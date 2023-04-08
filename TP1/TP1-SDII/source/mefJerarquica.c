@@ -34,6 +34,7 @@
 
 /*==================[inclusions]=============================================*/
 #include "mefJerarquica.h"
+#include "mef_habitual.h"
 
 /*==================[macros and definitions]=================================*/
 
@@ -48,15 +49,28 @@ estado_mefJerarquica;
 
 /*==================[internal data declaration]==============================*/
 
-/*==================[internal functions declaration]=========================*/
+/*==================[internal functions declaration]=========================*/}
+int actualizar_autos_en_espera();
 
 /*==================[internal data definition]===============================*/
 static estado_mefJerarquica estado;
+static int autos_en_espera;
 static bool corte_habilitado;
 
 /*==================[external data definition]===============================*/
 
 /*==================[internal functions definition]==========================*/
+int actualizar_autos_en_espera()
+{
+    if (key_getPressEv(BOARD_SW_ID_3))
+    {
+        if (estado == MEF_TRAFICO && autos_en_espera)
+            autos_en_espera--;
+        else
+            autos_en_espera++;
+    }
+    return autos_en_espera;
+}
 
 /*==================[external functions definition]==========================*/
 
@@ -64,7 +78,10 @@ void mefJerarquica_init(void)
 {
     estado = MEF_HABITUAL;
     corte_habilitado = true;
-    key_getPressEv(BOARD_SW_ID_1); // Por las dudas si estaba apretado
+    autos_en_espera = 0;
+    mefHabitual_init();
+    // mefCruce_init();
+    // mefTransito_init();
 }
 
 int mefJerarquica_run(void)
@@ -73,75 +90,71 @@ int mefJerarquica_run(void)
     {
 
     case MEF_HABITUAL:
-        mefHabitual_run();
+        bool ruta_habilitada = mefHabitual_run();
 
-        if (key_getPressEv(BOARD_SW_ID_1) && corte_habilitado)
+        if (key_getPressEv(BOARD_SW_ID_1) && ruta_habilitada && corte_habilitado)
         {
             estado = MEF_CRUCE;
             corte_habilitado = false;
         }
-        break;
 
-    case RUTA_CORTANDO:
-        board_setLed(LRS, ON);
-        board_setLed(LRR, OFF);
-        board_setLed(LVS, OFF);
-
-        if (contador_titilar <= 0)
+        if(autos_en_espera >= 3)
         {
-            contador_titilar = 200;
-            board_setLed(LVR, TOGGLE);
-        }
-
-        if (tim_mefJerarquica <= 0)
-        {
-            estado = SECUNDARIO_HABILITADO;
-            tim_mefJerarquica = 30000;
+            estado = MEF_TRAFICO;
         }
         break;
 
-    case SECUNDARIO_HABILITADO:
-        board_setLed(LVR, OFF);
-        board_setLed(LRS, OFF);
-        board_setLed(LRR, ON);
-        board_setLed(LVS, ON);
-
-        if (tim_mefJerarquica <= 0)
-        {
-            estado = SECUNDARIO_CORTANDO;
-            tim_mefJerarquica = 5000;
-        }
+    case MEF_CRUCE:
+        bool salir;
+        // bool salir = mefCruce();
+        corte_habilitado = true;
+        if (salir)
+            estado = MEF_HABITUAL;
         break;
 
-    case SECUNDARIO_CORTANDO:
-        board_setLed(LVR, OFF);
-        board_setLed(LRS, OFF);
-        board_setLed(LRR, ON);
+    case MEF_TRAFICO:
 
-        if (contador_titilar <= 0)
+        bool salir;
+        // bool salir = mefTrafico(autos_en_espera);
+
+        if (salir)
         {
-            contador_titilar = 200;
-            board_setLed(LVS, TOGGLE);
+            mefHabitual_init(); // Reseteo la MEF habitual
+            estado = MEF_HABITUAL;
         }
 
-        if (tim_mefJerarquica <= 0)
-        {
-            estado = RUTA_HABILITADA;
-            tim_mefJerarquica = 120000;
-        }
         break;
 
     default:
         break;
     }
 
-    return estado;
+    return 0;
 }
 
 void mefJerarquica_periodicTask1ms(void)
 {
+    /**
+     * El enunciado dice: "El sensor que detecta vehículos en el camino secundario se emularautilizando SW3
+     *  Mientras el sistema permite el paso por la carretera, cada pulsado de SW3 indicara la presencia de
+     * un vehículo. Cuando se habilita el paso por el camino secundario, cada pulsado de SW3 indicara que un
+     * vehículo ha cruzado. Se debe definir la función que se ocupa de esta tarea."
+     *
+     * Me resulta medio al pedo, pero creo q la bola va como que "conceptualmente" no está bueno ponerlo en el 
+     * main porque si el procesador está ocupado se pierde los eventos, o una boludez así, por eso lo pongo acá.
+     * (imposible q vengan 2 autos en 1 ms). Sino la otra es asignar una interrupción al SW3, pero ni en pedo
+     *
+     */
     if (estado == MEF_HABITUAL)
         mefHabitual_periodicTask1ms();
+
+    if (estado == MEF_CRUCE)
+        1;
+
+    if (estado == MEF_TRAFICO)
+        1;
+
+    actualizar_autos_en_espera();
 }
 
 /*==================[end of file]============================================*/
