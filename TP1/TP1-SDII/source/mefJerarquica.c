@@ -33,27 +33,26 @@
  */
 
 /*==================[inclusions]=============================================*/
-#include "mefHabitual.h"
+#include "mefJerarquica.h"
 
 /*==================[macros and definitions]=================================*/
 
 typedef enum
 {
-    RUTA_HABILITADA = 0,
-    RUTA_CORTANDO,
-    SECUNDARIO_HABILITADO,
+    MEF_HABITUAL = 0,
+    MEF_CRUCE,
+    MEF_TRAFICO,
     SECUNDARIO_CORTANDO;
 }
-estado_mefHabitual;
+estado_mefJerarquica;
 
 /*==================[internal data declaration]==============================*/
 
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
-static unsigned int tim_mefHabitual;
-static unsigned int contador_titilar;
-static estado_mefHabitual estado;
+static estado_mefJerarquica estado;
+static bool corte_habilitado;
 
 /*==================[external data definition]===============================*/
 
@@ -61,29 +60,25 @@ static estado_mefHabitual estado;
 
 /*==================[external functions definition]==========================*/
 
-void mefHabitual_init(void)
+void mefJerarquica_init(void)
 {
-    tim_mefHabitual = 0;
-    contador_titilar = 0;
-    tim_mefHabitual = 120000;
-    estado = RUTA_HABILITADA;
+    estado = MEF_HABITUAL;
+    corte_habilitado = true;
+    key_getPressEv(BOARD_SW_ID_1); // Por las dudas si estaba apretado
 }
 
-int mefHabitual_run(void)
+int mefJerarquica_run(void)
 {
     switch (estado)
     {
 
-    case RUTA_HABILITADA:
-        board_setLed(LVR, ON);
-        board_setLed(LRS, ON);
-        board_setLed(LRR, OFF);
-        board_setLed(LVS, OFF);
+    case MEF_HABITUAL:
+        mefHabitual_run();
 
-        if (tim_mefHabitual == 0)
+        if (key_getPressEv(BOARD_SW_ID_1) && corte_habilitado)
         {
-            estado = RUTA_CORTANDO;
-            tim_mefHabitual = 5000;
+            estado = MEF_CRUCE;
+            corte_habilitado = false;
         }
         break;
 
@@ -98,10 +93,10 @@ int mefHabitual_run(void)
             board_setLed(LVR, TOGGLE);
         }
 
-        if (tim_mefHabitual <= 0)
+        if (tim_mefJerarquica <= 0)
         {
             estado = SECUNDARIO_HABILITADO;
-            tim_mefHabitual = 30000;
+            tim_mefJerarquica = 30000;
         }
         break;
 
@@ -111,10 +106,10 @@ int mefHabitual_run(void)
         board_setLed(LRR, ON);
         board_setLed(LVS, ON);
 
-        if (tim_mefHabitual <= 0)
+        if (tim_mefJerarquica <= 0)
         {
             estado = SECUNDARIO_CORTANDO;
-            tim_mefHabitual = 5000;
+            tim_mefJerarquica = 5000;
         }
         break;
 
@@ -129,10 +124,10 @@ int mefHabitual_run(void)
             board_setLed(LVS, TOGGLE);
         }
 
-        if (tim_mefHabitual <= 0)
+        if (tim_mefJerarquica <= 0)
         {
             estado = RUTA_HABILITADA;
-            tim_mefHabitual = 120000;
+            tim_mefJerarquica = 120000;
         }
         break;
 
@@ -143,13 +138,10 @@ int mefHabitual_run(void)
     return estado;
 }
 
-void mefHabitual_periodicTask1ms(void)
+void mefJerarquica_periodicTask1ms(void)
 {
-    if (tim_mefHabitual)
-        tim_mefHabitual--;
-
-    if (contador_titilar)
-        contador_titilar--;
+    if (estado == MEF_HABITUAL)
+        mefHabitual_periodicTask1ms();
 }
 
 /*==================[end of file]============================================*/
