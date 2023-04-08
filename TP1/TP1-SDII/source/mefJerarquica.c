@@ -64,7 +64,7 @@ int actualizar_autos_en_espera()
 {
     if (key_getPressEv(BOARD_SW_ID_3))
     {
-        if (estado == MEF_TRAFICO)
+        if (estado == MEF_TRAFICO && autos_en_espera)
             autos_en_espera--;
         else
             autos_en_espera++;
@@ -98,7 +98,10 @@ int mefJerarquica_run(void)
             corte_habilitado = false;
         }
 
-        if(autos_en_espera)
+        if(autos_en_espera >= 3)
+        {
+            estado = MEF_TRAFICO;
+        }
         break;
 
     case MEF_CRUCE:
@@ -121,6 +124,7 @@ int mefJerarquica_run(void)
         }
 
         break;
+
     default:
         break;
     }
