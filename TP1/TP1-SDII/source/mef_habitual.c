@@ -69,8 +69,10 @@ void mefHabitual_init(void)
     estado = RUTA_HABILITADA;
 }
 
-int mefHabitual_run(void)
+bool mefHabitual_run(void)
 {
+    // Devuelve verdadero si la ruta está habilitada, falso en cualquier otro caso
+    bool ret = false;
     switch (estado)
     {
 
@@ -85,6 +87,8 @@ int mefHabitual_run(void)
             estado = RUTA_CORTANDO;
             tim_mefHabitual = 5000;
         }
+
+        ret = true;
         break;
 
     case RUTA_CORTANDO:
@@ -103,6 +107,7 @@ int mefHabitual_run(void)
             estado = SECUNDARIO_HABILITADO;
             tim_mefHabitual = 30000;
         }
+
         break;
 
     case SECUNDARIO_HABILITADO:
@@ -140,7 +145,7 @@ int mefHabitual_run(void)
         break;
     }
 
-    return estado;
+    return ret;
 }
 
 void mefHabitual_periodicTask1ms(void)
