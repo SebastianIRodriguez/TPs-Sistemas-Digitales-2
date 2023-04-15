@@ -43,15 +43,17 @@
 
 /*==================[internal data declaration]==============================*/
 static const board_gpioInfo_type board_gpioLeds[] =
-{
-    {PORTE, GPIOE, 31},     /* LED ROJO */
-    {PORTD, GPIOD, 5},      /* LED VERDE */
+	{
+		{PORTE, GPIOE, 31}, /* LED ROJO PLACA*/
+		{PORTD, GPIOD, 5},	/* LED VERDE PLACA*/
+		{PORTE, GPIOE, 30}, /* LED ROJO PROTOBOARD*/
+		{PORTC, GPIOC, 1},	/* LED VERDE PROTOBOARD*/
 };
 
 static const board_gpioInfo_type board_gpioSw[] =
-{
-    {PORTA, GPIOA, 4},      /* SW1 */
-    {PORTC, GPIOC, 3},     /* SW3 */
+	{
+		{PORTA, GPIOA, 4}, /* SW1 */
+		{PORTC, GPIOC, 3}, /* SW3 */
 };
 
 /*==================[internal functions declaration]=========================*/
@@ -67,17 +69,16 @@ void board_init(void)
 {
 	int32_t i;
 	gpio_pin_config_t gpio_led_config =
-	{
-		.outputLogic = 1,
-		.pinDirection = kGPIO_DigitalOutput,
-	};
+		{
+			.outputLogic = 1,
+			.pinDirection = kGPIO_DigitalOutput,
+		};
 	gpio_pin_config_t gpio_sw_config = {
 		.pinDirection = kGPIO_DigitalInput,
-		.outputLogic = 0U
-	};
+		.outputLogic = 0U};
 
 	const port_pin_config_t port_led_config = {
-			/* Internal pull-up/down resistor is disabled */
+		/* Internal pull-up/down resistor is disabled */
 		.pullSelect = kPORT_PullDisable,
 		/* Slow slew rate is configured */
 		.slewRate = kPORT_SlowSlewRate,
@@ -108,14 +109,14 @@ void board_init(void)
 	CLOCK_EnableClock(kCLOCK_PortE);
 
 	/* inicialización de leds */
-	for (i = 0 ; i < BOARD_LED_ID_TOTAL ; i++)
+	for (i = 0; i < BOARD_LED_ID_TOTAL; i++)
 	{
 		PORT_SetPinConfig(board_gpioLeds[i].port, board_gpioLeds[i].pin, &port_led_config);
 		GPIO_PinInit(board_gpioLeds[i].gpio, board_gpioLeds[i].pin, &gpio_led_config);
 	}
 
 	/* inicialización de SWs */
-	for (i = 0 ; i < BOARD_SW_ID_TOTAL ; i++)
+	for (i = 0; i < BOARD_SW_ID_TOTAL; i++)
 	{
 		PORT_SetPinConfig(board_gpioSw[i].port, board_gpioSw[i].pin, &port_sw_config);
 		GPIO_PinInit(board_gpioSw[i].gpio, board_gpioSw[i].pin, &gpio_sw_config);
@@ -124,38 +125,35 @@ void board_init(void)
 
 void board_setLed(board_ledId_enum id, board_ledMsg_enum msg)
 {
-    switch (msg)
-    {
-        case BOARD_LED_MSG_OFF:
-        	GPIO_PortSet(board_gpioLeds[id].gpio, 1<<board_gpioLeds[id].pin);
-            break;
+	switch (msg)
+	{
+	case BOARD_LED_MSG_OFF:
+		GPIO_PortSet(board_gpioLeds[id].gpio, 1 << board_gpioLeds[id].pin);
+		break;
 
-        case BOARD_LED_MSG_ON:
-        	GPIO_PortClear(board_gpioLeds[id].gpio, 1<<board_gpioLeds[id].pin);
-            break;
+	case BOARD_LED_MSG_ON:
+		GPIO_PortClear(board_gpioLeds[id].gpio, 1 << board_gpioLeds[id].pin);
+		break;
 
-        case BOARD_LED_MSG_TOGGLE:
-        	GPIO_PortToggle(board_gpioLeds[id].gpio, 1<<board_gpioLeds[id].pin);
-            break;
+	case BOARD_LED_MSG_TOGGLE:
+		GPIO_PortToggle(board_gpioLeds[id].gpio, 1 << board_gpioLeds[id].pin);
+		break;
 
-        default:
-            break;
-    }
+	default:
+		break;
+	}
 }
 
 bool board_getSw(board_swId_enum id)
 {
-    return !GPIO_PinRead(board_gpioSw[id].gpio, board_gpioSw[id].pin);
+	return !GPIO_PinRead(board_gpioSw[id].gpio, board_gpioSw[id].pin);
 }
 
 /****  revisar   ****/
 
 bool board_getLed(board_ledId_enum id)
 {
-    return !GPIO_PinRead(board_gpioLeds[id].gpio, board_gpioLeds[id].pin);
+	return !GPIO_PinRead(board_gpioLeds[id].gpio, board_gpioLeds[id].pin);
 }
-
-
-
 
 /*==================[end of file]============================================*/

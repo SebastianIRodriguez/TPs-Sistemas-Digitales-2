@@ -51,6 +51,12 @@ estado_mefHabitual;
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
+static const unsigned int TIEMPO_RUTA_HABILITADA = 120000;
+static const unsigned int TIEMPO_RUTA_CORTANDO = 5000;
+static const unsigned int TIEMPO_SECUNDARIO_HABILITADO = 30000;
+static const unsigned int TIEMPO_SECUNDARIO_CORTANDO = 5000;
+static const unsigned int PERIODO_LVR = 200;
+static const unsigned int PERIODO_LVS = 200;
 static unsigned int tim_mefHabitual;
 static unsigned int contador_titilar;
 static estado_mefHabitual estado;
@@ -63,16 +69,14 @@ static estado_mefHabitual estado;
 
 void mefHabitual_init(void)
 {
-    tim_mefHabitual = 0;
     contador_titilar = 0;
-    tim_mefHabitual = 120000;
+    tim_mefHabitual = TIEMPO_RUTA_HABILITADA;
     estado = RUTA_HABILITADA;
 }
 
 bool mefHabitual_run(void)
 {
     // Devuelve verdadero si la ruta está habilitada, falso en cualquier otro caso
-    bool ret = false;
     switch (estado)
     {
 
@@ -82,13 +86,12 @@ bool mefHabitual_run(void)
         board_setLed(LRR, OFF);
         board_setLed(LVS, OFF);
 
-        if (tim_mefHabitual == 0)
+        if (tim_mefHabitual <= 0)
         {
             estado = RUTA_CORTANDO;
-            tim_mefHabitual = 5000;
+            tim_mefHabitual = TIEMPO_RUTA_CORTANDO;
         }
 
-        ret = true;
         break;
 
     case RUTA_CORTANDO:
@@ -98,14 +101,14 @@ bool mefHabitual_run(void)
 
         if (contador_titilar <= 0)
         {
-            contador_titilar = 200;
+            contador_titilar = PERIDODO_LVR;
             board_setLed(LVR, TOGGLE);
         }
 
         if (tim_mefHabitual <= 0)
         {
             estado = SECUNDARIO_HABILITADO;
-            tim_mefHabitual = 30000;
+            tim_mefHabitual = TIEMPO_SECUNDARIO_HABILITADO;
         }
 
         break;
@@ -119,7 +122,7 @@ bool mefHabitual_run(void)
         if (tim_mefHabitual <= 0)
         {
             estado = SECUNDARIO_CORTANDO;
-            tim_mefHabitual = 5000;
+            tim_mefHabitual = TIEMPO_SECUNDARIO_CORTANDO;
         }
         break;
 
@@ -130,14 +133,14 @@ bool mefHabitual_run(void)
 
         if (contador_titilar <= 0)
         {
-            contador_titilar = 200;
+            contador_titilar = PERIODO_LVS;
             board_setLed(LVS, TOGGLE);
         }
 
         if (tim_mefHabitual <= 0)
         {
             estado = RUTA_HABILITADA;
-            tim_mefHabitual = 120000;
+            tim_mefHabitual = TIEMPO_RUTA_HABILITADA;
         }
         break;
 
@@ -145,7 +148,7 @@ bool mefHabitual_run(void)
         break;
     }
 
-    return ret;
+    return (estado == RUTA_HABILITADA);
 }
 
 void mefHabitual_periodicTask1ms(void)

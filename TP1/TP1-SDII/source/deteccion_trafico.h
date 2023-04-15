@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef mefCruce_H_
-#define mefCruce_H_
+#ifndef deteccionTrafico_H_
+#define deteccionTrafico_H_
 
 /*==================[inclusions]=============================================*/
 #include "SD2_board.h"
@@ -42,7 +42,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /*==================[macros]=================================================*/
 
 /*==================[typedef]================================================*/
@@ -50,10 +49,9 @@ extern "C" {
 /*==================[external data declaration]==============================*/
 
 /*==================[external functions definition]==========================*/
-void mefCruce_init(void);
-bool mefCruce_run(void);
-void mefCruce_periodicTask1ms(void);
-
+int actualizar_autos_en_espera(bool camino_secundario_habilitado);
+int get_autos_en_espera();
+void reset_autos_en_espera();
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus
 }

@@ -69,7 +69,7 @@ void mefTrafico_init(void)
     estado = AVISO_HABILITACION_CAMINO;
 }
 
-int mefTrafico_run(int cant_autos_en_espera)
+bool mefTrafico_run()
 {
     switch (estado)
     {
@@ -96,7 +96,7 @@ int mefTrafico_run(int cant_autos_en_espera)
             board_setLed(LRR, ON);
             board_setLed(LVS, ON);
 
-            if (cant_autos_en_espera <= 0)
+            if (get_autos_en_espera() <= 0)
             {
                 estado = AVISO_CORTE_RUTA;
                 tim_mefTrafico = 5 * 1000;
@@ -117,18 +117,15 @@ int mefTrafico_run(int cant_autos_en_espera)
 
             if (tim_mefTrafico <= 0)
             {
-                estado = SALIR;
+                return true;
             }
-            break;
-
-        case SALIR:
             break;
 
         default:
             break;
     }
 
-    return (estado == SALIR);
+    return false;
 }
 
 void mefTrafico_periodicTask1ms(void)

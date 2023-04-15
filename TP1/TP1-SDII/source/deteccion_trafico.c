@@ -32,32 +32,36 @@
  *
  */
 
-#ifndef mefCruce_H_
-#define mefCruce_H_
-
 /*==================[inclusions]=============================================*/
-#include "SD2_board.h"
 
-/*==================[cplusplus]==============================================*/
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "deteccion_trafico.h"
 
-/*==================[macros]=================================================*/
+/*==================[macros and definitions]=================================*/
 
-/*==================[typedef]================================================*/
+/*==================[internal data declaration]==============================*/
 
-/*==================[external data declaration]==============================*/
+static int autos_en_espera;
+
+/*==================[internal functions declaration]=========================*/
+
+/*==================[internal data definition]===============================*/
+
+/*==================[external data definition]===============================*/
+
+/*==================[internal functions definition]==========================*/
+
+int actualizar_autos_en_espera(bool camino_secundario_habilitado)
+{
+    if (key_getPressEv(BOARD_SW_ID_3))
+    {
+        if (camino_secundario_habilitado && autos_en_espera)
+            autos_en_espera--;
+        else
+            autos_en_espera++;
+    }
+    return autos_en_espera;
+}
 
 /*==================[external functions definition]==========================*/
-void mefCruce_init(void);
-bool mefCruce_run(void);
-void mefCruce_periodicTask1ms(void);
-
-/*==================[cplusplus]==============================================*/
-#ifdef __cplusplus
-}
-#endif
 
 /*==================[end of file]============================================*/
-#endif /* KEY_H_ */

@@ -4,11 +4,17 @@
 
 int main(void)
 {
+	//SystemCoreClock = 48MHz
 	SysTick_Config(SystemCoreClock / 1000U);
 
 	board_init();
 	key_init();
-	mefHabitual_init();
+	mefJerarquica_init();
+
+	while(true)
+	{
+		mefJerarquica_run();
+	}
 
 	return 0;
 }
@@ -16,4 +22,5 @@ int main(void)
 void SysTick_Handler(void)
 {
 	key_periodicTask1ms();
+	mefJerarquica_periodicTask1ms();
 }

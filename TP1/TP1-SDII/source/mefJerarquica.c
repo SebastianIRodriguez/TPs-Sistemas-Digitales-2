@@ -42,46 +42,31 @@ typedef enum
 {
     MEF_HABITUAL = 0,
     MEF_CRUCE,
-    MEF_TRAFICO,
-    SECUNDARIO_CORTANDO;
-}
-estado_mefJerarquica;
+    MEF_TRAFICO
+} estado_mefJerarquica;
 
 /*==================[internal data declaration]==============================*/
 
 /*==================[internal functions declaration]=========================*/}
-int actualizar_autos_en_espera();
 
 /*==================[internal data definition]===============================*/
 static estado_mefJerarquica estado;
-static int autos_en_espera;
-static bool corte_habilitado;
+static bool no_se_ha_cortado;
 
 /*==================[external data definition]===============================*/
 
 /*==================[internal functions definition]==========================*/
-int actualizar_autos_en_espera()
-{
-    if (key_getPressEv(BOARD_SW_ID_3))
-    {
-        if (estado == MEF_TRAFICO && autos_en_espera)
-            autos_en_espera--;
-        else
-            autos_en_espera++;
-    }
-    return autos_en_espera;
-}
 
 /*==================[external functions definition]==========================*/
 
 void mefJerarquica_init(void)
 {
     estado = MEF_HABITUAL;
-    corte_habilitado = true;
-    autos_en_espera = 0;
+    no_se_ha_cortado = true;
+    reset_autos_en_espera();
     mefHabitual_init();
-    // mefCruce_init();
-    // mefTransito_init();
+    mefCruce_init();
+    mefTransito_init();
 }
 
 int mefJerarquica_run(void)
@@ -92,34 +77,39 @@ int mefJerarquica_run(void)
     case MEF_HABITUAL:
         bool ruta_habilitada = mefHabitual_run();
 
-        if (key_getPressEv(BOARD_SW_ID_1) && ruta_habilitada && corte_habilitado)
+        if (ruta_habilitada == 0)
         {
-            estado = MEF_CRUCE;
-            corte_habilitado = false;
+            no_se_ha_cortado = true;
         }
 
-        if(autos_en_espera >= 3)
+        if (key_getPressEv(BOARD_SW_ID_1) && ruta_habilitada && no_se_ha_cortado)
+        {
+            estado = MEF_CRUCE;
+            no_se_ha_cortado = false;
+        }
+
+        if (get_autos_en_espera() >= 3)
         {
             estado = MEF_TRAFICO;
         }
         break;
 
     case MEF_CRUCE:
-        bool salir;
-        // bool salir = mefCruce();
-        corte_habilitado = true;
-        if (salir)
-            estado = MEF_HABITUAL;
-        break;
-
-    case MEF_TRAFICO:
-
-        bool salir;
-        // bool salir = mefTrafico(autos_en_espera);
+        bool salir = mefCruce();
 
         if (salir)
         {
-            mefHabitual_init(); // Reseteo la MEF habitual
+            mefCruce_init();
+            estado = MEF_HABITUAL;
+        }
+        break;
+
+    case MEF_TRAFICO:
+        bool salir = mefTrafico_run();
+
+        if (salir)
+        {
+            mefHabitual_init();
             estado = MEF_HABITUAL;
         }
 
@@ -135,26 +125,30 @@ int mefJerarquica_run(void)
 void mefJerarquica_periodicTask1ms(void)
 {
     /**
-     * El enunciado dice: "El sensor que detecta vehículos en el camino secundario se emularautilizando SW3
+     * El enunciado dice: "El sensor que detecta vehículos en el camino secundario se emulara utilizando SW3
      *  Mientras el sistema permite el paso por la carretera, cada pulsado de SW3 indicara la presencia de
      * un vehículo. Cuando se habilita el paso por el camino secundario, cada pulsado de SW3 indicara que un
      * vehículo ha cruzado. Se debe definir la función que se ocupa de esta tarea."
-     *
-     * Me resulta medio al pedo, pero creo q la bola va como que "conceptualmente" no está bueno ponerlo en el 
-     * main porque si el procesador está ocupado se pierde los eventos, o una boludez así, por eso lo pongo acá.
-     * (imposible q vengan 2 autos en 1 ms). Sino la otra es asignar una interrupción al SW3, pero ni en pedo
-     *
      */
-    if (estado == MEF_HABITUAL)
+    switch (estado)
+    {
+    case MEF_HABITUAL:
         mefHabitual_periodicTask1ms();
+        break;
 
-    if (estado == MEF_CRUCE)
-        1;
+    case MEF_CRUCE:
+        mefCruce_periodickTask1ms();
+        break;
 
-    if (estado == MEF_TRAFICO)
-        1;
+    case MEF_TRAFICO:
+        mefTrafico_periodickTask1ms();
+        break;
 
-    actualizar_autos_en_espera();
+    default:
+        break;
+    }
+
+    actualizar_autos_en_espera(estado == MEF_TRAFICO);
 }
 
 /*==================[end of file]============================================*/

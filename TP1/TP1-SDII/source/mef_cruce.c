@@ -69,7 +69,7 @@ void mefCruce_init(void)
     estado = AVISO_CORTE_RUTA;
 }
 
-int mefCruce_run(void)
+bool mefCruce_run(void)
 {
     switch (estado)
     {
@@ -118,18 +118,15 @@ int mefCruce_run(void)
 
             if (tim_mefCruce <= 0)
             {
-                estado = SALIR;
+                return true;
             }
-            break;
-
-        case SALIR:
             break;
 
         default:
             break;
     }
 
-    return (estado == SALIR);
+    return false;
 }
 
 void mefCruce_periodicTask1ms(void)

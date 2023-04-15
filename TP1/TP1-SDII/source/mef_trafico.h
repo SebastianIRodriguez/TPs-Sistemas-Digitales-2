@@ -37,6 +37,7 @@
 
 /*==================[inclusions]=============================================*/
 #include "SD2_board.h"
+#include "deteccion_trafico.h"
 
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus
@@ -51,7 +52,7 @@ extern "C" {
 
 /*==================[external functions definition]==========================*/
 void mefTrafico_init(void);
-int mefTrafico_run(int cant_autos_en_espera);
+bool mefTrafico_run();
 void mefTrafico_periodicTask1ms(void);
 
 /*==================[cplusplus]==============================================*/

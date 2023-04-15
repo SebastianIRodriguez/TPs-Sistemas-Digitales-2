@@ -51,7 +51,7 @@ extern "C" {
 
 /*==================[external functions definition]==========================*/
 void mefHabitual_init(void);
-int mefHabitual_run(void);
+bool mefHabitual_run(void);
 void mefHabitual_periodicTask1ms(void);
 
 /*==================[cplusplus]==============================================*/
