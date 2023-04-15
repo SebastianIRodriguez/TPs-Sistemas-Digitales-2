@@ -34,7 +34,8 @@
 
 /*==================[inclusions]=============================================*/
 #include "mefJerarquica.h"
-#include "mef_habitual.h"
+#include "deteccion_trafico.h"
+//#include "mef_habitual.h"
 
 /*==================[macros and definitions]=================================*/
 
@@ -47,7 +48,7 @@ typedef enum
 
 /*==================[internal data declaration]==============================*/
 
-/*==================[internal functions declaration]=========================*/}
+/*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
 static estado_mefJerarquica estado;
@@ -66,7 +67,7 @@ void mefJerarquica_init(void)
     reset_autos_en_espera();
     mefHabitual_init();
     mefCruce_init();
-    mefTransito_init();
+    mefTrafico_init();
 }
 
 int mefJerarquica_run(void)
@@ -75,7 +76,9 @@ int mefJerarquica_run(void)
     {
 
     case MEF_HABITUAL:
+    {
         bool ruta_habilitada = mefHabitual_run();
+
 
         if (ruta_habilitada == 0)
         {
@@ -92,19 +95,23 @@ int mefJerarquica_run(void)
         {
             estado = MEF_TRAFICO;
         }
+    }
         break;
 
     case MEF_CRUCE:
-        bool salir = mefCruce();
+    {
+        bool salir = mefCruce_run();
 
         if (salir)
         {
             mefCruce_init();
             estado = MEF_HABITUAL;
         }
+    }
         break;
 
     case MEF_TRAFICO:
+    {
         bool salir = mefTrafico_run();
 
         if (salir)
@@ -114,7 +121,7 @@ int mefJerarquica_run(void)
         }
 
         break;
-
+    }
     default:
         break;
     }
@@ -137,11 +144,11 @@ void mefJerarquica_periodicTask1ms(void)
         break;
 
     case MEF_CRUCE:
-        mefCruce_periodickTask1ms();
+        mefCruce_periodicTask1ms();
         break;
 
     case MEF_TRAFICO:
-        mefTrafico_periodickTask1ms();
+        mefTrafico_periodicTask1ms();
         break;
 
     default:

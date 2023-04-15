@@ -127,15 +127,15 @@ void board_setLed(board_ledId_enum id, board_ledMsg_enum msg)
 {
 	switch (msg)
 	{
-	case BOARD_LED_MSG_OFF:
+	case OFF:
 		GPIO_PortSet(board_gpioLeds[id].gpio, 1 << board_gpioLeds[id].pin);
 		break;
 
-	case BOARD_LED_MSG_ON:
+	case ON:
 		GPIO_PortClear(board_gpioLeds[id].gpio, 1 << board_gpioLeds[id].pin);
 		break;
 
-	case BOARD_LED_MSG_TOGGLE:
+	case TOGGLE:
 		GPIO_PortToggle(board_gpioLeds[id].gpio, 1 << board_gpioLeds[id].pin);
 		break;
 

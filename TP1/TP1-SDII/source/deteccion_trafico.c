@@ -35,6 +35,7 @@
 /*==================[inclusions]=============================================*/
 
 #include "deteccion_trafico.h"
+#include "key.h"
 
 /*==================[macros and definitions]=================================*/
 
@@ -60,6 +61,16 @@ int actualizar_autos_en_espera(bool camino_secundario_habilitado)
             autos_en_espera++;
     }
     return autos_en_espera;
+}
+
+int get_autos_en_espera()
+{
+	return autos_en_espera;
+}
+
+void reset_autos_en_espera()
+{
+	autos_en_espera = 0;
 }
 
 /*==================[external functions definition]==========================*/

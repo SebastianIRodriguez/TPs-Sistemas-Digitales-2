@@ -37,7 +37,12 @@
 
 /*==================[inclusions]=============================================*/
 #include "SD2_board.h"
+#include "key.h"
 #include "deteccion_trafico.h"
+#include "mef_trafico.h"
+#include "mef_cruce.h"
+#include "mef_habitual.h"
+
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus
 extern "C" {

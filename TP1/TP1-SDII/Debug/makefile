@@ -34,7 +34,7 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := clase_5_4
+BUILD_ARTIFACT_NAME := TP1-SDII
 BUILD_ARTIFACT_EXTENSION := axf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
@@ -46,24 +46,24 @@ all:
 	+@$(MAKE) --no-print-directory main-build && $(MAKE) --no-print-directory post-build
 
 # Main-build Target
-main-build: clase_5_4.axf
+main-build: TP1-SDII.axf
 
 # Tool invocations
-clase_5_4.axf: $(OBJS) $(USER_OBJS) makefile objects.mk $(OPTIONAL_TOOL_DEPS)
+TP1-SDII.axf: $(OBJS) $(USER_OBJS) makefile objects.mk $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -Xlinker -Map="clase_5_4.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T clase_22_3_i1_Debug.ld -o "clase_5_4.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -nostdlib -Xlinker -Map="TP1-SDII.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T clase_22_3_i1_Debug.ld -o "TP1-SDII.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) clase_5_4.axf
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) TP1-SDII.axf
 	-@echo ' '
 
 post-build:
 	-@echo 'Performing post-build steps'
-	-arm-none-eabi-size "clase_5_4.axf"; # arm-none-eabi-objcopy -v -O binary "clase_5_4.axf" "clase_5_4.bin" ; # checksum -p MKL43Z256xxx4 -d "clase_5_4.bin";
+	-arm-none-eabi-size "TP1-SDII.axf"; # arm-none-eabi-objcopy -v -O binary "TP1-SDII.axf" "TP1-SDII.bin" ; # checksum -p MKL43Z256xxx4 -d "TP1-SDII.bin";
 	-@echo ' '
 
 .PHONY: all clean dependents post-build

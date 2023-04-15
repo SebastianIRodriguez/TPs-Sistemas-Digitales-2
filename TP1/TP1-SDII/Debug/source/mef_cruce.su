@@ -1,0 +1,3 @@
+../source/mef_cruce.c:64:6:mefCruce_init	8	static
+../source/mef_cruce.c:72:6:mefCruce_run	8	static
+../source/mef_cruce.c:132:6:mefCruce_periodicTask1ms	8	static

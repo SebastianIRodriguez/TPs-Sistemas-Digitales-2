@@ -37,7 +37,7 @@
 
 /*==================[inclusions]=============================================*/
 #include "MKL43Z4.h"
-#include "stdbool.h"
+#include <stdbool.h>
 
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus

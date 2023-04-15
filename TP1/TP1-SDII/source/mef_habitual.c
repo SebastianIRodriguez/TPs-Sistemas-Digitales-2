@@ -33,7 +33,7 @@
  */
 
 /*==================[inclusions]=============================================*/
-#include "mefHabitual.h"
+#include "mef_habitual.h"
 
 /*==================[macros and definitions]=================================*/
 
@@ -42,7 +42,7 @@ typedef enum
     RUTA_HABILITADA = 0,
     RUTA_CORTANDO,
     SECUNDARIO_HABILITADO,
-    SECUNDARIO_CORTANDO;
+    SECUNDARIO_CORTANDO,
 }
 estado_mefHabitual;
 
@@ -101,7 +101,7 @@ bool mefHabitual_run(void)
 
         if (contador_titilar <= 0)
         {
-            contador_titilar = PERIDODO_LVR;
+            contador_titilar = PERIODO_LVR;
             board_setLed(LVR, TOGGLE);
         }
 
