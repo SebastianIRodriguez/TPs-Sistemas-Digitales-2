@@ -51,14 +51,14 @@ static int autos_en_espera;
 
 /*==================[internal functions definition]==========================*/
 
-int actualizar_autos_en_espera(bool camino_secundario_habilitado)
+int actualizar_autos_en_espera(bool camino_secundario_bloqueado)
 {
     if (key_getPressEv(BOARD_SW_ID_3))
     {
-        if (camino_secundario_habilitado && autos_en_espera)
+        if (camino_secundario_bloqueado)
+        	autos_en_espera++;
+        else if (autos_en_espera)
             autos_en_espera--;
-        else
-            autos_en_espera++;
     }
     return autos_en_espera;
 }

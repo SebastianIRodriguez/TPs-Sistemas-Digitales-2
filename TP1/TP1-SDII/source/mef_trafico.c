@@ -63,7 +63,6 @@ static estado_mefTrafico estado;
 
 void mefTrafico_init(void)
 {
-    tim_mefTrafico = 0;
     contador_titilar = 0;
     tim_mefTrafico = 5 * 1000;
     estado = AVISO_HABILITACION_CAMINO;
@@ -74,6 +73,7 @@ bool mefTrafico_run()
     switch (estado)
     {
         case AVISO_HABILITACION_CAMINO:
+        	{
             board_setLed(LRS, ON);
             board_setLed(LRR, OFF);
             board_setLed(LVS, OFF);
@@ -88,10 +88,12 @@ bool mefTrafico_run()
             {
                 estado = CAMINO_HABILITADO;
             }
+        	}
             break;
 
         case CAMINO_HABILITADO:
-            board_setLed(LVR, OFF);
+        	{
+        	board_setLed(LVR, OFF);
             board_setLed(LRS, OFF);
             board_setLed(LRR, ON);
             board_setLed(LVS, ON);
@@ -101,9 +103,11 @@ bool mefTrafico_run()
                 estado = AVISO_CORTE_RUTA;
                 tim_mefTrafico = 5 * 1000;
             }
+        	}
             break;
 
         case AVISO_CORTE_RUTA:
+        	{
             board_setLed(LVR, OFF);
             board_setLed(LRS, OFF);
             board_setLed(LRR, ON);
@@ -119,6 +123,7 @@ bool mefTrafico_run()
             {
                 return true;
             }
+        	}
             break;
 
         default:

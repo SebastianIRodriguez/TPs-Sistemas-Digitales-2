@@ -51,6 +51,9 @@ estado_mefCruce;
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
+static const unsigned int TIEMPO_AVISO_CORTE_RUTA = 10000;
+static const unsigned int TIEMPO_CRUCE_HABILITADO = 30000; //60000
+static const unsigned int TIEMPO_AVISO_HABILITACION_RUTA = 10000;
 static unsigned int tim_mefCruce;
 static unsigned int contador_titilar;
 static estado_mefCruce estado;
@@ -63,9 +66,8 @@ static estado_mefCruce estado;
 
 void mefCruce_init(void)
 {
-    tim_mefCruce = 0;
     contador_titilar = 0;
-    tim_mefCruce = 10 * 1000;
+    tim_mefCruce = TIEMPO_AVISO_CORTE_RUTA;
     estado = AVISO_CORTE_RUTA;
 }
 
@@ -87,7 +89,7 @@ bool mefCruce_run(void)
             if (tim_mefCruce <= 0)
             {
                 estado = CRUCE_HABILITADO;
-                tim_mefCruce = 60 * 1000;
+                tim_mefCruce = TIEMPO_CRUCE_HABILITADO;
             }
             break;
 
@@ -100,7 +102,7 @@ bool mefCruce_run(void)
             if (tim_mefCruce <= 0)
             {
                 estado = AVISO_HABILITACION_RUTA;
-                tim_mefCruce = 10 * 1000;
+                tim_mefCruce = TIEMPO_AVISO_HABILITACION_RUTA;
             }
             break;
 

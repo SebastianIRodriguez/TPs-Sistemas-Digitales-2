@@ -96,11 +96,12 @@ int mefJerarquica_run(void)
             estado = MEF_TRAFICO;
         }
     }
-        break;
+    break;
 
     case MEF_CRUCE:
     {
         bool salir = mefCruce_run();
+        reset_autos_en_espera();
 
         if (salir)
         {
@@ -108,7 +109,7 @@ int mefJerarquica_run(void)
             estado = MEF_HABITUAL;
         }
     }
-        break;
+    break;
 
     case MEF_TRAFICO:
     {
@@ -117,11 +118,12 @@ int mefJerarquica_run(void)
         if (salir)
         {
             mefHabitual_init();
+            mefTrafico_init();
             estado = MEF_HABITUAL;
         }
-
-        break;
     }
+    break;
+
     default:
         break;
     }
@@ -155,7 +157,7 @@ void mefJerarquica_periodicTask1ms(void)
         break;
     }
 
-    actualizar_autos_en_espera(estado == MEF_TRAFICO);
+    actualizar_autos_en_espera(estado == MEF_HABITUAL);
 }
 
 /*==================[end of file]============================================*/
