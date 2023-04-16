@@ -51,12 +51,14 @@ estado_mefHabitual;
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
+//Temporizaciones en [ms]
 static const unsigned int TIEMPO_RUTA_HABILITADA = 20000; //120000
 static const unsigned int TIEMPO_RUTA_CORTANDO = 5000;
 static const unsigned int TIEMPO_SECUNDARIO_HABILITADO = 10000;
 static const unsigned int TIEMPO_SECUNDARIO_CORTANDO = 5000;
 static const unsigned int PERIODO_LVR = 200;
 static const unsigned int PERIODO_LVS = 200;
+
 static unsigned int tim_mefHabitual;
 static unsigned int contador_titilar;
 static estado_mefHabitual estado;

@@ -41,8 +41,7 @@ typedef enum
 {
     AVISO_HABILITACION_CAMINO,
     CAMINO_HABILITADO,
-    AVISO_CORTE_RUTA,
-    SALIR
+    AVISO_CORTE_CAMINO
 }
 estado_mefTrafico;
 
@@ -51,6 +50,12 @@ estado_mefTrafico;
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
+//Temporizaciones en [ms]
+static const unsigned int TIEMPO_AVISO_HABILITACION_CAMINO = 5000;
+static const unsigned int TIEMPO_AVISO_CORTE_RUTA = 5000;
+static const unsigned int PERIODO_LVR = 200;
+static const unsigned int PERIODO_LVS = 200;
+
 static unsigned int tim_mefTrafico;
 static unsigned int contador_titilar;
 static estado_mefTrafico estado;
@@ -64,7 +69,7 @@ static estado_mefTrafico estado;
 void mefTrafico_init(void)
 {
     contador_titilar = 0;
-    tim_mefTrafico = 5 * 1000;
+    tim_mefTrafico = TIEMPO_AVISO_HABILITACION_CAMINO;
     estado = AVISO_HABILITACION_CAMINO;
 }
 
@@ -80,7 +85,7 @@ bool mefTrafico_run()
 
             if (contador_titilar <= 0)
             {
-                contador_titilar = 200;
+                contador_titilar = PERIODO_LVR;
                 board_setLed(LVR, TOGGLE);
             }
 
@@ -100,13 +105,13 @@ bool mefTrafico_run()
 
             if (get_autos_en_espera() <= 0)
             {
-                estado = AVISO_CORTE_RUTA;
-                tim_mefTrafico = 5 * 1000;
+                estado = AVISO_CORTE_CAMINO;
+                tim_mefTrafico = TIEMPO_AVISO_CORTE_RUTA;
             }
         	}
             break;
 
-        case AVISO_CORTE_RUTA:
+        case AVISO_CORTE_CAMINO:
         	{
             board_setLed(LVR, OFF);
             board_setLed(LRS, OFF);
@@ -114,7 +119,7 @@ bool mefTrafico_run()
 
             if (contador_titilar <= 0)
             {
-                contador_titilar = 200;
+                contador_titilar = PERIODO_LVS;
                 board_setLed(LVS, TOGGLE);
             }
 
