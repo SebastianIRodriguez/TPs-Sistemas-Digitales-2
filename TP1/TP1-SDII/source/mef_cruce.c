@@ -39,10 +39,9 @@
 
 typedef enum
 {
-    AVISO_CORTE_RUTA,
+    AVISO_CORTE_CAMINO,
     CRUCE_HABILITADO,
-    AVISO_HABILITACION_RUTA,
-    SALIR
+    AVISO_HABILITACION_RUTA
 }
 estado_mefCruce;
 
@@ -51,9 +50,14 @@ estado_mefCruce;
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
+
+//Temporizaciones en [ms]
 static const unsigned int TIEMPO_AVISO_CORTE_RUTA = 10000;
 static const unsigned int TIEMPO_CRUCE_HABILITADO = 30000; //60000
 static const unsigned int TIEMPO_AVISO_HABILITACION_RUTA = 10000;
+static const unsigned int PERIODO_LVR = 200;
+static const unsigned int PERIODO_LRR = 200;
+
 static unsigned int tim_mefCruce;
 static unsigned int contador_titilar;
 static estado_mefCruce estado;
@@ -68,21 +72,21 @@ void mefCruce_init(void)
 {
     contador_titilar = 0;
     tim_mefCruce = TIEMPO_AVISO_CORTE_RUTA;
-    estado = AVISO_CORTE_RUTA;
+    estado = AVISO_CORTE_CAMINO;
 }
 
 bool mefCruce_run(void)
 {
     switch (estado)
     {
-        case AVISO_CORTE_RUTA:
+        case AVISO_CORTE_CAMINO:
             board_setLed(LRS, ON);
             board_setLed(LRR, OFF);
             board_setLed(LVS, OFF);
 
             if (contador_titilar <= 0)
             {
-                contador_titilar = 200;
+                contador_titilar = PERIODO_LVR;
                 board_setLed(LVR, TOGGLE);
             }
 
@@ -113,7 +117,7 @@ bool mefCruce_run(void)
 
             if (contador_titilar <= 0)
             {
-                contador_titilar = 200;
+                contador_titilar = PERIODO_LRR;
                 board_setLed(LRR, TOGGLE);
             }
 

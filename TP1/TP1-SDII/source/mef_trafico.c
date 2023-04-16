@@ -41,8 +41,7 @@ typedef enum
 {
     AVISO_HABILITACION_CAMINO,
     CAMINO_HABILITADO,
-    AVISO_CORTE_CAMINO,
-    SALIR
+    AVISO_CORTE_CAMINO
 }
 estado_mefTrafico;
 
@@ -51,8 +50,12 @@ estado_mefTrafico;
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
+//Temporizaciones en [ms]
 static const unsigned int TIEMPO_AVISO_HABILITACION_CAMINO = 5000;
 static const unsigned int TIEMPO_AVISO_CORTE_CAMINO = 5000;
+static const unsigned int PERIODO_LVR = 200;
+static const unsigned int PERIODO_LVS = 200;
+
 static unsigned int tim_mefTrafico;
 static unsigned int contador_titilar;
 static estado_mefTrafico estado;
@@ -82,7 +85,7 @@ bool mefTrafico_run()
 
             if (contador_titilar <= 0)
             {
-                contador_titilar = 200;
+                contador_titilar = PERIODO_LVR;
                 board_setLed(LVR, TOGGLE);
             }
 
@@ -116,7 +119,7 @@ bool mefTrafico_run()
 
             if (contador_titilar <= 0)
             {
-                contador_titilar = 200;
+                contador_titilar = PERIODO_LVS;
                 board_setLed(LVS, TOGGLE);
             }
 
