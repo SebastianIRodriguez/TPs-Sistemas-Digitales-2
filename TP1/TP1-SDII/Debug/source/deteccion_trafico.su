@@ -1,3 +1,3 @@
 ../source/deteccion_trafico.c:54:5:actualizar_autos_en_espera	16	static
-../source/deteccion_trafico.c:66:5:get_autos_en_espera	8	static
-../source/deteccion_trafico.c:71:6:reset_autos_en_espera	8	static
+../source/deteccion_trafico.c:64:5:get_autos_en_espera	8	static
+../source/deteccion_trafico.c:68:6:reset_autos_en_espera	8	static

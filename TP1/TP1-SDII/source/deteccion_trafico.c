@@ -51,25 +51,21 @@ static int autos_en_espera;
 
 /*==================[internal functions definition]==========================*/
 
-int actualizar_autos_en_espera(bool camino_secundario_bloqueado)
-{
-    if (key_getPressEv(BOARD_SW_ID_3))
-    {
-        if (camino_secundario_bloqueado)
-        	autos_en_espera++;
-        else if (autos_en_espera)
-            autos_en_espera--;
-    }
-    return autos_en_espera;
-}
-
-int get_autos_en_espera()
-{
+int actualizar_autos_en_espera(bool camino_secundario_deshabilitado) {
+	if (key_getPressEv(BOARD_SW_ID_3)) {
+		if (camino_secundario_deshabilitado) {
+			autos_en_espera++;
+		} else if (autos_en_espera)
+			autos_en_espera--;
+	}
 	return autos_en_espera;
 }
 
-void reset_autos_en_espera()
-{
+int get_autos_en_espera() {
+	return autos_en_espera;
+}
+
+void reset_autos_en_espera() {
 	autos_en_espera = 0;
 }
 

@@ -83,6 +83,7 @@ int mefJerarquica_run(void)
         if (ruta_habilitada == 0)
         {
             no_se_ha_cortado = true;
+            reset_autos_en_espera();
         }
 
         if (key_getPressEv(BOARD_SW_ID_1) && ruta_habilitada && no_se_ha_cortado)
@@ -91,7 +92,7 @@ int mefJerarquica_run(void)
             no_se_ha_cortado = false;
         }
 
-        if (get_autos_en_espera() >= 3)
+        if (get_autos_en_espera() >= 3 && ruta_habilitada)
         {
             estado = MEF_TRAFICO;
         }
@@ -106,6 +107,7 @@ int mefJerarquica_run(void)
         if (salir)
         {
             mefCruce_init();
+            key_getPressEv(BOARD_SW_ID_1);
             estado = MEF_HABITUAL;
         }
     }
@@ -119,6 +121,7 @@ int mefJerarquica_run(void)
         {
             mefHabitual_init();
             mefTrafico_init();
+            key_getPressEv(BOARD_SW_ID_1);
             estado = MEF_HABITUAL;
         }
     }
@@ -143,6 +146,7 @@ void mefJerarquica_periodicTask1ms(void)
     {
     case MEF_HABITUAL:
         mefHabitual_periodicTask1ms();
+        actualizar_autos_en_espera(true);
         break;
 
     case MEF_CRUCE:
@@ -153,11 +157,10 @@ void mefJerarquica_periodicTask1ms(void)
         mefTrafico_periodicTask1ms();
         break;
 
+
     default:
         break;
     }
-
-    actualizar_autos_en_espera(estado == MEF_HABITUAL);
 }
 
 /*==================[end of file]============================================*/
