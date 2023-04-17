@@ -1,5 +1,3 @@
-#include "SD2_board.h"
-#include "key.h"
 #include "mefJerarquica.h"
 
 int main(void)
@@ -7,8 +5,6 @@ int main(void)
 	//SystemCoreClock = 48MHz
 	SysTick_Config(SystemCoreClock / 1000U);
 
-	board_init();
-	key_init();
 	mefJerarquica_init();
 
 	while(true)
@@ -21,6 +17,5 @@ int main(void)
 
 void SysTick_Handler(void)
 {
-	key_periodicTask1ms();
 	mefJerarquica_periodicTask1ms();
 }

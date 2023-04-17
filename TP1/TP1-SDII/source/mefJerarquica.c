@@ -64,6 +64,8 @@ void mefJerarquica_init(void)
 {
     estado = MEF_HABITUAL;
     no_se_ha_cortado = true;
+	board_init();
+	key_init();
     reset_autos_en_espera();
     mefHabitual_init();
     mefCruce_init();
@@ -79,9 +81,10 @@ int mefJerarquica_run(void)
     {
         bool ruta_habilitada = mefHabitual_run();
 
-
         if (ruta_habilitada == 0)
         {
+        	// Considramos que todos los autos que estuvieran esperando cruzan
+        	// Si abandona el estado "RUTA_HABILITADA" puede interrumpirse para cruce peatonal
             no_se_ha_cortado = true;
             reset_autos_en_espera();
         }
@@ -121,7 +124,7 @@ int mefJerarquica_run(void)
         {
             mefHabitual_init();
             mefTrafico_init();
-            key_getPressEv(BOARD_SW_ID_1);
+            key_getPressEv(BOARD_SW_ID_1); // Quito cualquier presionada de botón que se pudo haber efectuado
             estado = MEF_HABITUAL;
         }
     }
@@ -142,11 +145,12 @@ void mefJerarquica_periodicTask1ms(void)
      * un vehículo. Cuando se habilita el paso por el camino secundario, cada pulsado de SW3 indicara que un
      * vehículo ha cruzado. Se debe definir la función que se ocupa de esta tarea."
      */
+	key_periodicTask1ms();
+
     switch (estado)
     {
     case MEF_HABITUAL:
         mefHabitual_periodicTask1ms();
-        actualizar_autos_en_espera(true);
         break;
 
     case MEF_CRUCE:

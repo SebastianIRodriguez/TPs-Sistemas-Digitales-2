@@ -66,6 +66,7 @@ int get_autos_en_espera() {
 }
 
 void reset_autos_en_espera() {
+	key_getPressEv(BOARD_SW_ID_3);
 	autos_en_espera = 0;
 }
 

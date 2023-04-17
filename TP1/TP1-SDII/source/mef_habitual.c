@@ -74,6 +74,7 @@ void mefHabitual_init(void)
     contador_titilar = 0;
     tim_mefHabitual = TIEMPO_RUTA_HABILITADA;
     estado = RUTA_HABILITADA;
+    reset_autos_en_espera();
 }
 
 bool mefHabitual_run(void)
@@ -160,6 +161,8 @@ void mefHabitual_periodicTask1ms(void)
 
     if (contador_titilar)
         contador_titilar--;
+
+    actualizar_autos_en_espera(estado == RUTA_HABILITADA);
 }
 
 /*==================[end of file]============================================*/

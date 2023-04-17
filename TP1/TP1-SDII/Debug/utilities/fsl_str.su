@@ -10,8 +10,7 @@
 ../utilities/fsl_str.c:489:17:ScanIsWhiteSpace	24	static
 ../utilities/fsl_str.c:499:17:ScanIgnoreWhiteSpace	24	static
 ../utilities/fsl_str.c:514:16:ConvertRadixNumToString	64	static
-../utilities/fsl_str.c:626:16:ConvertFloatRadixNumToString	120	static
-../utilities/fsl_str.c:737:5:StrFormatPrintf	152	static
+../utilities/fsl_str.c:737:5:StrFormatPrintf	144	static
 ../utilities/fsl_str.c:989:16:StrFormatScanIsFormatStarting	24	static
 ../utilities/fsl_str.c:1008:16:StrFormatScanGetBase	16	static
 ../utilities/fsl_str.c:1031:16:StrFormatScanCheckSymbol	24	static

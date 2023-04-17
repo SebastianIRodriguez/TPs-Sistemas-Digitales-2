@@ -37,7 +37,7 @@
 
 /*==================[inclusions]=============================================*/
 #include "SD2_board.h"
-
+#include "deteccion_trafico.h"
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus
 extern "C" {
