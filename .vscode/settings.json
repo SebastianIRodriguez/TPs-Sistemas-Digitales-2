@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "*.m": "matlab",
-        "sd2_board.h": "c"
+        "sd2_board.h": "c",
+        "font_macro.h": "c",
+        "coyote.h": "c",
+        "display_utils.h": "c",
+        "oled.h": "c"
     }
 }
