@@ -1,4 +1,4 @@
-C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\prueba_bajo_consumo\CMSIS/core_cm0plus.h:741:22:__NVIC_EnableIRQ	16	static
+C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\CMSIS/core_cm0plus.h:741:22:__NVIC_EnableIRQ	16	static
 ../drivers/fsl_clock.h:438:20:CLOCK_EnableClock	24	static
 ../drivers/fsl_common.h:484:28:EnableIRQ	16	static
 ../drivers/fsl_flexio.h:486:20:FLEXIO_EnableShifterStatusInterrupts	16	static

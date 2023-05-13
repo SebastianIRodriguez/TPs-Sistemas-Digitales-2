@@ -34,7 +34,7 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := prueba_bajo_consumo
+BUILD_ARTIFACT_NAME := merge_definitivo
 BUILD_ARTIFACT_EXTENSION := axf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
@@ -46,24 +46,24 @@ all:
 	+@$(MAKE) --no-print-directory main-build && $(MAKE) --no-print-directory post-build
 
 # Main-build Target
-main-build: prueba_bajo_consumo.axf
+main-build: merge_definitivo.axf
 
 # Tool invocations
-prueba_bajo_consumo.axf: $(OBJS) $(USER_OBJS) makefile objects.mk $(OPTIONAL_TOOL_DEPS)
+merge_definitivo.axf: $(OBJS) $(USER_OBJS) makefile objects.mk $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -Xlinker -Map="prueba_bajo_consumo.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T Ejemplo_Clock_Debug.ld -o "prueba_bajo_consumo.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -nostdlib -Xlinker -Map="merge_definitivo.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T Ejemplo_Clock_Debug.ld -o "merge_definitivo.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) prueba_bajo_consumo.axf
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) merge_definitivo.axf
 	-@echo ' '
 
 post-build:
 	-@echo 'Performing post-build steps'
-	-arm-none-eabi-size "prueba_bajo_consumo.axf"; # arm-none-eabi-objcopy -v -O binary "prueba_bajo_consumo.axf" "prueba_bajo_consumo.bin" ; # checksum -p MKL43Z256xxx4 -d "prueba_bajo_consumo.bin";
+	-arm-none-eabi-size "merge_definitivo.axf"; # arm-none-eabi-objcopy -v -O binary "merge_definitivo.axf" "merge_definitivo.bin" ; # checksum -p MKL43Z256xxx4 -d "merge_definitivo.bin";
 	-@echo ' '
 
 .PHONY: all clean dependents post-build

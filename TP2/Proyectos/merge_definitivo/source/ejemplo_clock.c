@@ -42,6 +42,12 @@
 
 #include "SD2_board.h"
 #include "key.h"
+#include "oled.h"
+#include "SD2_I2C.h"
+#include "mma8451.h"
+#include "mef.h"
+
+// sssssss
 
 static uint32_t timeDown1ms;
 
@@ -81,7 +87,36 @@ int main(void) {
     /* Se configura interrupción de systick */
     SysTick_Config(SystemCoreClock / 1000U);
 
+    BOARD_InitBootClocks();
+    //BOARD_InitBootPins();
+
+    board_configSPI0();
+
+    oled_init();
+    oled_setContrast(16);
+
+    /* =========== I2C =================== */
+    SD2_I2C_init();
+
+    /* =========== MMA8451 ================ */
+    mma8451_init();
+    mma8451_setDataRate(DR_12p5hz);
+
+    mef_init();
+
+
+    // ********************* Ejecución
+    oled_clearScreen(OLED_COLOR_BLACK);
+
+    /* Drawing */
+    oled_fillRect(32, 16, 32+64, 16+32, OLED_COLOR_WHITE);
+    oled_fillRect(32+8, 16+8, 32+64-8, 16+32-8, OLED_COLOR_BLACK);
+    oled_putString(56, 29, (uint8_t *)"Hola :D", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    oled_circle(64, 32, 31, OLED_COLOR_WHITE);
+
+
     while(1) {
+    	mef();
 
     	if (timeDown1ms == 0)
     	{

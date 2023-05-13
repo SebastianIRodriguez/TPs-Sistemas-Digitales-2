@@ -1,5 +1,5 @@
-C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\prueba_bajo_consumo\drivers/fsl_clock.h:629:20:CLOCK_SetSimSafeDivs	8	static
-C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\prueba_bajo_consumo\drivers/fsl_smc.h:275:33:SMC_GetPowerModeState	16	static
+C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\drivers/fsl_clock.h:629:20:CLOCK_SetSimSafeDivs	8	static
+C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\drivers/fsl_smc.h:275:33:SMC_GetPowerModeState	16	static
 ../source/power_mode_switch.c:30:6:APP_SetClockRunFromVlpr	32	static
 ../source/power_mode_switch.c:50:6:APP_SetClockVlpr	32	static
 ../source/power_mode_switch.c:71:6:APP_ShowPowerMode	16	static
