@@ -39,7 +39,6 @@
 #include "clock_config.h"
 #include "fsl_smc.h"
 #include "power_mode_switch.h"
-#include "pin_mux.h"
 
 #include "SD2_board.h"
 #include "key.h"
@@ -48,6 +47,8 @@
 #include "mma8451.h"
 #include "mef.h"
 
+// sssssss
+
 static uint32_t timeDown1ms;
 
 int main(void) {
@@ -55,9 +56,7 @@ int main(void) {
 	uint32_t freq = 0;
 	smc_power_state_t currentPowerState;
 
-	PRINTF("\r\n####################  TP2 Raffagnini Rodriguez - SD2 ####################\n\r\n");
-
-
+	PRINTF("\r\n####################  Ejemplo Clock - SD2 ####################\n\r\n");
 
 	currentPowerState = SMC_GetPowerModeState(SMC);
 	APP_ShowPowerMode(currentPowerState);
@@ -79,41 +78,44 @@ int main(void) {
     /* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
+    /* Se inicializa funciones de la placa */
+    board_init();
+
+    /* Se inicializa la MEF de pulsadores*/
+    key_init();
+
     /* Se configura interrupción de systick */
     SysTick_Config(SystemCoreClock / 1000U);
 
-	/* Inits */
-	BOARD_InitBootClocks();
-    BOARD_InitBootPins();
-    BOARD_InitDebugConsole();
+    BOARD_InitBootClocks();
+    //BOARD_InitBootPins();
 
-    board_init();
     board_configSPI0();
-    key_init();
 
-	oled_init();
-	oled_setContrast(16);
+    oled_init();
+    oled_setContrast(16);
 
-	/* =========== I2C =================== */
-	SD2_I2C_init();
+    /* =========== I2C =================== */
+    SD2_I2C_init();
 
-	/* =========== MMA8451 ================ */
-	mma8451_init();
-	mma8451_setDataRate(DR_12p5hz);
+    /* =========== MMA8451 ================ */
+    mma8451_init();
+    mma8451_setDataRate(DR_12p5hz);
 
-	mef_init();
+    mef_init();
 
-	// ********************* Ejecución
-	oled_clearScreen(OLED_COLOR_BLACK);
 
-	/* Drawing */
-	oled_fillRect(32, 16, 32+64, 16+32, OLED_COLOR_WHITE);
-	oled_fillRect(32+8, 16+8, 32+64-8, 16+32-8, OLED_COLOR_BLACK);
-	oled_putString(56, 29, (uint8_t *)":D", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-	oled_circle(64, 32, 31, OLED_COLOR_WHITE);
+    // ********************* Ejecución
+    oled_clearScreen(OLED_COLOR_BLACK);
+
+    /* Drawing */
+    oled_fillRect(32, 16, 32+64, 16+32, OLED_COLOR_WHITE);
+    oled_fillRect(32+8, 16+8, 32+64-8, 16+32-8, OLED_COLOR_BLACK);
+    oled_putString(56, 29, (uint8_t *)"Hola :D", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    oled_circle(64, 32, 31, OLED_COLOR_WHITE);
+
 
     while(1) {
-
     	mef();
 
     	if (timeDown1ms == 0)

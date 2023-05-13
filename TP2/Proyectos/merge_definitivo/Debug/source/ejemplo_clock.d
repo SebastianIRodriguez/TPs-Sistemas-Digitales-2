@@ -19,9 +19,7 @@ source/ejemplo_clock.o source/ejemplo_clock.d: ../source/ejemplo_clock.c \
  C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\component\uart/uart.h \
  C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\board/clock_config.h \
  C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\drivers/fsl_smc.h \
- ../source/power_mode_switch.h \
- C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\board/pin_mux.h \
- ../source/SD2_board.h \
+ ../source/power_mode_switch.h ../source/SD2_board.h \
  C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\device/MKL43Z4.h \
  ../source/key.h ../source/oled.h ../source/SD2_I2C.h ../source/mma8451.h \
  ../source/mef.h
@@ -46,7 +44,6 @@ C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\co
 C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\board/clock_config.h:
 C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\drivers/fsl_smc.h:
 ../source/power_mode_switch.h:
-C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\board/pin_mux.h:
 ../source/SD2_board.h:
 C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\device/MKL43Z4.h:
 ../source/key.h:
