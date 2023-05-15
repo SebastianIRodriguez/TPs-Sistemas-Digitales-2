@@ -35,11 +35,15 @@ void print_image(uint8_t x0, uint8_t y0, unsigned char* image, uint8_t width_in_
     }
 }
 
-void print_falling_state() {
+void display_fallingState() {
     print_image(32, 0, coyote_cayendo, 64, 64);
 }
 
-void print_accel_display_state(int acceleration) {
+void display_sleepingState() {
+    print_image(8, 0, coyote_durmiendo, 96, 64);
+}
+
+void display_accelDisplayState(int acceleration) {
     print_image(32, 0, coyote_golpeado, 64, 64);
 
     char completo[5], entero[3], decimales[3], a_imprimir[6];

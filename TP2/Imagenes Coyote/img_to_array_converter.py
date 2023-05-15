@@ -5,7 +5,8 @@ import cv2
 
 images = [
     'coyote_cayendo_bw_escalado_final',
-    'coyote_final'
+    'coyote_final',
+    'coyote_descansando'
 ]
 
 def convert_to_oled_format(image_name):

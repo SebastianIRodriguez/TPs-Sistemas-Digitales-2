@@ -22,8 +22,9 @@ extern "C" {
 /*==================[external functions definition]==========================*/
 
 void print_image(uint8_t x0, uint8_t y0, unsigned char* image, uint8_t width_in_px, uint8_t height_in_px);
-void print_falling_state(void);
-void print_accel_display_state(int acceleration);
+void display_fallingState(void);
+void display_accelDisplayState(int acceleration);
+void display_sleepingState(void);
 
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus

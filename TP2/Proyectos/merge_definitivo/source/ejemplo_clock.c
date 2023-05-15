@@ -93,7 +93,7 @@ int main(void)
   // =========== MMA8451 ================
   mma8451_init();
   mma8451_setDataRate(DR_100hz);
-  print_accel_display_state(1281);
+  display_accelDisplayState(1281);
 
   // ****************** EJECUCIÓN
   mef_init();

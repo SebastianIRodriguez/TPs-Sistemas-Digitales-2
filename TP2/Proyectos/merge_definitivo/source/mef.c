@@ -84,6 +84,7 @@ void mef_init(void)
 
     freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
     PRINTF("    Core Clock = %dMHz \r\r", freq / 1000000);
+    display_sleepingState();
     estado = HACIENDO_NONI;
 }
 
@@ -157,6 +158,7 @@ int mef_run(void)
 
             freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
             PRINTF("    Core Clock = %dMHz \r\r", freq / 1000000);
+            display_sleepingState();
             estado = HACIENDO_NONI;
         }
     }
