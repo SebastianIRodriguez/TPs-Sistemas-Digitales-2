@@ -1,0 +1,6 @@
+C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\CMSIS/core_cm0plus.h:850:22:__NVIC_SetPriority	24	static
+C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\CMSIS/core_cm0plus.h:1056:26:SysTick_Config	16	static
+C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\drivers/fsl_smc.h:256:20:SMC_SetPowerModeProtection	16	static
+C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\merge_definitivo\drivers/fsl_smc.h:275:33:SMC_GetPowerModeState	16	static
+../source/ejemplo_clock.c:51:5:main	8	static
+../source/ejemplo_clock.c:94:6:SysTick_Handler	8	static

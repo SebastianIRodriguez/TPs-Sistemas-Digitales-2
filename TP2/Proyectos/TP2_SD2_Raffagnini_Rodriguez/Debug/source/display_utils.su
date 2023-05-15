@@ -1,0 +1,4 @@
+../source/display_utils.c:6:6:print_image	56	static
+../source/display_utils.c:40:6:display_fallingState	16	static
+../source/display_utils.c:44:6:display_sleepingState	16	static
+../source/display_utils.c:48:6:display_accelDisplayState	56	static

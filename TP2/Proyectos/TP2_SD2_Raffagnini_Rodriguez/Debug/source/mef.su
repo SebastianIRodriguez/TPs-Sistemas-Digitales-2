@@ -1,0 +1,4 @@
+C:\Users\lraff\Documents\MCUXpressoIDE_11.5.1_7266\workspace\TP2_SD2_Raffagnini_Rodriguez\drivers/fsl_smc.h:275:33:SMC_GetPowerModeState	16	static
+../source/mef.c:75:6:mef_init	8	static
+../source/mef.c:94:5:mef_run	40	static
+../source/mef.c:170:6:mef_periodicTask1ms	8	static
