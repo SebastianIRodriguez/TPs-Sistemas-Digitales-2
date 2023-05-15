@@ -46,6 +46,22 @@
 #define INT1_GPIO       GPIOC
 #define INT1_PIN        5
 
+// ***** Direcciones
+#define STATUS_ADDRESS       0X00
+#define INT_SOURCE_ADDRESS   0X0C
+#define FF_MT_CONFIG_ADDRESS 0x15
+#define FF_MT_SRC_ADDRESS 0x16
+#define FF_MT_THRESHOLD_ADDRESS 0x17
+#define FF_MT_COUNT_ADDRESS 0x18
+#define CTRL_REG1_ADDRESS   0X2A
+#define CTRL_REG4_ADDRESS   0X2D
+#define CTRL_REG5_ADDRESS   0X2E
+
+
+//1. Register 0x15 FF/MT Config - Motion/Freefall Configuration
+//2. Register 0x17 FF_MT_THS - Setting the Threshold
+//3. Register 0x18 FF_MT_COUNT - Setting the Debounce Counter
+//4. Register 0x16 FF_MT_SRC - Motion/Freefall Source Detection
 typedef union
 {
     struct
@@ -60,7 +76,8 @@ typedef union
         unsigned SRC_ASLP:1;
     };
     uint8_t data;
-}INT_SOURCE_t;
+}
+INT_SOURCE_t;
 
 typedef union
 {
@@ -76,7 +93,8 @@ typedef union
         unsigned ZYXOW:1;
     };
     uint8_t data;
-}STATUS_t	;
+}
+STATUS_t;
 
 typedef union
 {
@@ -89,9 +107,8 @@ typedef union
         unsigned ASLP_RATE:2;
     };
     uint8_t data;
-}CTRL_REG1_t;
-
-#define CTRL_REG1_ADDRESS   0X2A
+}
+CTRL_REG1_t;
 
 typedef union
 {
@@ -107,9 +124,8 @@ typedef union
         unsigned INT_EN_ASLP:1;
     };
     uint8_t data;
-}CTRL_REG4_t;
-
-#define CTRL_REG4_ADDRESS   0X2D
+}
+CTRL_REG4_t;
 
 typedef union
 {
@@ -125,12 +141,67 @@ typedef union
         unsigned INT_CFG_ASLP:1;
     };
     uint8_t data;
-}CTRL_REG5_t;
+}
+CTRL_REG5_t;
 
-#define CTRL_REG5_ADDRESS   0X2E
+// Registro para configurar si el modo es detección de movimiento o caída libre
+typedef union
+{
+    struct
+    {
+    	unsigned :1;
+    	unsigned :1;
+    	unsigned :1;
+    	unsigned XEFE:1;
+    	unsigned YEFE:1;
+    	unsigned ZEFE:1;
+    	unsigned OAE:1;
+        unsigned ELE:1;
+    };
+    uint8_t data;
+}
+FF_MT_CONFIG_t;
 
-#define INT_SOURCE_ADDRESS   0X0C
-#define STATUS_ADDRESS       0X00
+// Registro para configurar el umbral de caída libre, 127 cuentas con 1 cuenta =  0.063g/LSB
+typedef union
+{
+    struct
+    {
+        unsigned threshold:7;
+        unsigned DBCNTM:1;
+    };
+    uint8_t data;
+}
+FF_MT_THRESHOLD_t;
+
+// Configura un filtro pasa-bajos para eliminar falsos positivos de FF
+typedef union
+{
+	uint8_t count;
+    uint8_t data;
+}
+FF_MT_COUNT_t;
+
+// Indica si se detectó caída libre
+typedef union
+{
+	//EA se pone el 1 si se detectó el evento, leer el registro limpia la bandera
+    struct
+    {
+        unsigned XHP:1;
+        unsigned XHE:1;
+        unsigned YHP:1;
+        unsigned YHE:1;
+        unsigned ZHP:1;
+        unsigned ZHE:1;
+        unsigned :1;
+        unsigned EA:1;
+    };
+    uint8_t data;
+}
+FF_MT_SRC_t;
+
+
 
 /*==================[internal data declaration]==============================*/
 
@@ -154,6 +225,25 @@ static uint8_t mma8451_read_reg(uint8_t addr)
 	I2C_MasterTransferBlocking(I2C0, &masterXfer);
 
 	return ret;
+}
+
+static void mma8451_read_multi_reg(uint8_t addr, unsigned int size, uint8_t * answer)
+{
+	i2c_master_transfer_t masterXfer;
+    //uint8_t ret;
+
+	memset(&masterXfer, 0, sizeof(masterXfer));    // pone todo en cero (sizeof())
+	masterXfer.slaveAddress = MMA8451_I2C_ADDRESS;
+	masterXfer.direction = kI2C_Read;
+	masterXfer.subaddress = addr;
+	masterXfer.subaddressSize = 1;
+	masterXfer.data = answer;
+	masterXfer.dataSize = size;
+	masterXfer.flags = kI2C_TransferDefaultFlag;
+
+	I2C_MasterTransferBlocking(I2C0, &masterXfer);
+
+	//return ret;
 }
 
 static void mma8451_write_reg(uint8_t addr, uint8_t data)
@@ -215,44 +305,57 @@ void mma8451_init(void)
     CTRL_REG1_t ctrl_reg1;
     CTRL_REG4_t ctrl_reg4;
     CTRL_REG5_t ctrl_reg5;
+    FF_MT_CONFIG_t ff_mt_config;
+    FF_MT_THRESHOLD_t ff_mt_threshold;
+    FF_MT_COUNT_t ff_mt_count;
 
     /* Primero desactivo el acelerómetro, luego escribo otros registros*/
 
 	ctrl_reg1.ACTIVE = 0;
 	ctrl_reg1.F_READ = 0;
 	ctrl_reg1.LNOISE = 1;
-	ctrl_reg1.DR = 0B101;
+	ctrl_reg1.DR = 0B100; // ODR (Output Data Rate) de 50 Hz
 	ctrl_reg1.ASLP_RATE = 0B00;
-
     mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
 
+    // Configuro la detección de caída libre
+    ff_mt_config.ELE = 1;
+    ff_mt_config.OAE = 0;
+    ff_mt_config.XEFE = 1;
+    ff_mt_config.YEFE = 1;
+    ff_mt_config.ZEFE = 1;
+    mma8451_write_reg(FF_MT_CONFIG_ADDRESS, ff_mt_config.data);
+
+    // Configuro el umbral de detección de caída libre a < 0.2G
+    ff_mt_threshold.threshold = 3; // (3 cuentas * /0.063g)
+    ff_mt_threshold.DBCNTM = 0;
+    mma8451_write_reg(FF_MT_THRESHOLD_ADDRESS, ff_mt_threshold.data);
+
+    // Configuro el debouncer/ filtro PB
+    ff_mt_count.count = 6; //  6 cuentas o 120 ms a 50Hz ODR
+    mma8451_write_reg(FF_MT_COUNT_ADDRESS, ff_mt_count.data);
+
+    // Habilito la interrupción por data ready y por caída libre
 	ctrl_reg4.INT_EN_DRDY = 1;
-	ctrl_reg4.INT_EN_FF_MT = 0;
+	ctrl_reg4.INT_EN_FF_MT = 1;
 	ctrl_reg4.INT_EN_PULSE = 0;
 	ctrl_reg4.INT_EN_LNDPRT = 0;
 	ctrl_reg4.INT_EN_TRANS = 0;
 	ctrl_reg4.INT_EN_FIFO = 0;
 	ctrl_reg4.INT_EN_ASLP = 0;
-
 	mma8451_write_reg(CTRL_REG4_ADDRESS, ctrl_reg4.data);
 
-
+	// Ruteo las interrupciones por data ready y por caída libre al pin INT1
 	ctrl_reg5.INT_CFG_DRDY = 1;
-	ctrl_reg5.INT_CFG_FF_MT = 0;
+	ctrl_reg5.INT_CFG_FF_MT = 1;
 	ctrl_reg5.INT_CFG_PULSE = 0;
 	ctrl_reg5.INT_CFG_LNDPRT = 0;
 	ctrl_reg5.INT_CFG_TRANS = 0;
 	ctrl_reg5.INT_CFG_FIFO = 0;
 	ctrl_reg5.INT_CFG_ASLP = 0;
-
 	mma8451_write_reg(CTRL_REG5_ADDRESS, ctrl_reg5.data);
 
 	ctrl_reg1.ACTIVE = 1;
-	ctrl_reg1.F_READ = 0;
-	ctrl_reg1.LNOISE = 1;
-	ctrl_reg1.DR = 0B101;
-	ctrl_reg1.ASLP_RATE = 0B00;
-
     mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
 
     config_port_int1();
@@ -278,7 +381,6 @@ void mma8451_setDataRate(DR_enum rate)
 
 	mma8451_write_reg(CTRL_REG1_ADDRESS, ctr_reg1.data);
 
-
 }
 
 int16_t mma8451_getAcX(void)
@@ -301,33 +403,41 @@ void PORTC_PORTD_IRQHandler(void)
     int16_t readG;
     INT_SOURCE_t intSource;
     STATUS_t status;
+    uint8_t lecturas[7];
+
 
     intSource.data = mma8451_read_reg(INT_SOURCE_ADDRESS);
 
     if (intSource.SRC_DRDY)
     {
     	status.data = mma8451_read_reg(STATUS_ADDRESS);
+    	mma8451_read_multi_reg(0x01, 6, lecturas);
 
         if (status.XDR)
         {
-            readG   = (int16_t)mma8451_read_reg(0x01)<<8;
-            readG  |= mma8451_read_reg(0x02);
+            readG   = (int16_t)lecturas[0]<<8;
+            readG  |= lecturas[1];
             readX = readG >> 2;
         }
 
         if (status.YDR)
         {
-            readG   = (int16_t)mma8451_read_reg(0x03)<<8;
-            readG  |= mma8451_read_reg(0x04);
+            readG   = (int16_t)lecturas[3]<<8;
+            readG  |= lecturas[4];
             readY = readG >> 2;
         }
 
         if (status.ZDR)
         {
-            readG   = (int16_t)mma8451_read_reg(0x05)<<8;
-            readG  |= mma8451_read_reg(0x06);
+            readG   = (int16_t)lecturas[5]<<8;
+            readG  |= lecturas[6];
             readZ = readG >> 2;
         }
+    }
+    if(intSource.SRC_FF_MT)
+    {
+    	mma8451_read_reg(FF_MT_SRC_ADDRESS); // Limpio la bandera
+    	PRINTF("AYUDA ME CAIGOOOOO\n");
     }
 
     PORT_ClearPinsInterruptFlags(INT1_PORT, 1<<INT1_PIN);

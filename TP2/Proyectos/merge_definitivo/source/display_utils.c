@@ -1,8 +1,12 @@
 #include "display_utils.h"
+#include "oled.h"
+#include <stdio.h>
+#include "fsl_debug_console.h"
 
-void print_image(uint8_t x0, uint8_t y0, unsigned char* image, uint8_t width_in_px, uint8_t height_in_px) {
+void print_image(uint8_t x0, uint8_t y0, unsigned char* image, uint8_t width_in_px, uint8_t height_in_px)
+{
     
-    int width_in_bytes = width_in_px * 8;
+    int width_in_bytes = width_in_px / 8;
     int array_length = width_in_px * height_in_px / 8;
     
     int row_pos = 0;
@@ -14,7 +18,7 @@ void print_image(uint8_t x0, uint8_t y0, unsigned char* image, uint8_t width_in_
         }
 
         //Imprimir 8 pixeles
-        unsigned char img_segment = image[i];
+        //unsigned char img_segment = image[i];
         for (int k = 7; k >= 0; k--)
         {
             char pixel_value = (image[i] >> k) & 0x01;
@@ -26,7 +30,7 @@ void print_image(uint8_t x0, uint8_t y0, unsigned char* image, uint8_t width_in_
 
             uint8_t y = y0 + row_pos;
             
-            led_putPixel(x, y, pixel_color);
+            oled_putPixel(x, y, pixel_color);
         }
     }
 }
@@ -35,10 +39,37 @@ void print_falling_state() {
     print_image(32, 0, coyote_cayendo, 64, 64);
 }
 
-void print_accel_display_state(float acceleration) {
+void print_accel_display_state(int acceleration) {
     print_image(32, 0, coyote_golpeado, 64, 64);
 
-    char c[4];
-    sprintf(c, "%.2f", acceleration);
-    oled_putString(88, 8, (uint8_t*)c, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    char completo[5], entero[3], decimales[3], a_imprimir[6];
+
+    sprintf(completo, "%d", acceleration);
+
+    if(strlen(completo) > 3)
+    {
+    	// Es un número de dos sifras con 2 decimales xx.yy
+    	entero[0] = completo[0];
+    	entero[1] = completo[1];
+    	entero[2] = 0;
+
+    	decimales[0] = completo[2];
+    	decimales[1] = completo[3];
+    	decimales[2] = 0;
+    }
+    else
+    {
+    	// Es un número de 1 sifra con 2 decimales x.yy
+
+    	entero[0] = completo[0];
+    	entero[1] = 0;
+
+    	decimales[0] = completo[1];
+    	decimales[1] = completo[2];
+    	decimales[2] = 0;
+    }
+
+    sprintf(a_imprimir, "%s.%s", entero, decimales);
+    //oled_putString(88, 8, (uint8_t*)c, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    oled_putString(88, 8, (uint8_t*)a_imprimir, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 }

@@ -46,8 +46,7 @@
 #include "SD2_I2C.h"
 #include "mma8451.h"
 #include "mef.h"
-
-// sssssss
+#include "display_utils.h"
 
 static uint32_t timeDown1ms;
 
@@ -56,7 +55,7 @@ int main(void) {
 	uint32_t freq = 0;
 	smc_power_state_t currentPowerState;
 
-	PRINTF("\r\n####################  Ejemplo Clock - SD2 ####################\n\r\n");
+	PRINTF("\r\n####################  TP2 Raffagnini Rodriguez - SD2 ####################\n\r\n");
 
 	currentPowerState = SMC_GetPowerModeState(SMC);
 	APP_ShowPowerMode(currentPowerState);
@@ -109,10 +108,12 @@ int main(void) {
     oled_clearScreen(OLED_COLOR_BLACK);
 
     /* Drawing */
-    oled_fillRect(32, 16, 32+64, 16+32, OLED_COLOR_WHITE);
-    oled_fillRect(32+8, 16+8, 32+64-8, 16+32-8, OLED_COLOR_BLACK);
-    oled_putString(56, 29, (uint8_t *)"Hola :D", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    oled_circle(64, 32, 31, OLED_COLOR_WHITE);
+    //oled_fillRect(32, 16, 32+64, 16+32, OLED_COLOR_WHITE);
+    //oled_fillRect(32+8, 16+8, 32+64-8, 16+32-8, OLED_COLOR_BLACK);
+    //oled_putString(56, 29, (uint8_t *)"Hola :D", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    //print_falling_state();
+    print_accel_display_state(1281);
+    //oled_circle(64, 32, 31, OLED_COLOR_WHITE);
 
 
     while(1) {

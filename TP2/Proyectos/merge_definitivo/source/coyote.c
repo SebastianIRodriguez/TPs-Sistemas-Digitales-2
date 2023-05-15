@@ -5,7 +5,7 @@
 * Global variables
  ******************/
 
-const unsigned char coyote_cayendo[] =
+unsigned char coyote_cayendo[]=
 {
     _______X,X_______,________,________,________,_X____XX,__XXX___,________,
     _______X,X_______,________,________,________,_X____X_,_XXXX___,________,
@@ -73,7 +73,7 @@ const unsigned char coyote_cayendo[] =
     ________,________,XXX_____,________,________,__X_____,________,________,
 };
 
-const unsigned char coyote_golpeado[][8] =
+unsigned char coyote_golpeado[] =
 {
     ________,________,________,________,________,________,________,________,
     ________,________,________,________,__XX____,________,________,________,

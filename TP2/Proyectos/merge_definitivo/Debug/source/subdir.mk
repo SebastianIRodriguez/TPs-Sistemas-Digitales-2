@@ -6,6 +6,8 @@
 C_SRCS += \
 ../source/SD2_I2C.c \
 ../source/SD2_board.c \
+../source/coyote.c \
+../source/display_utils.c \
 ../source/ejemplo_clock.c \
 ../source/font5x7.c \
 ../source/key.c \
@@ -19,6 +21,8 @@ C_SRCS += \
 OBJS += \
 ./source/SD2_I2C.o \
 ./source/SD2_board.o \
+./source/coyote.o \
+./source/display_utils.o \
 ./source/ejemplo_clock.o \
 ./source/font5x7.o \
 ./source/key.o \
@@ -32,6 +36,8 @@ OBJS += \
 C_DEPS += \
 ./source/SD2_I2C.d \
 ./source/SD2_board.d \
+./source/coyote.d \
+./source/display_utils.d \
 ./source/ejemplo_clock.d \
 ./source/font5x7.d \
 ./source/key.d \
