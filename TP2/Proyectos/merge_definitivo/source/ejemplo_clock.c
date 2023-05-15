@@ -86,7 +86,7 @@ int main(void) {
     /* Se configura interrupción de systick */
     SysTick_Config(SystemCoreClock / 1000U);
 
-    BOARD_InitBootClocks();
+    //BOARD_InitBootClocks();
     //BOARD_InitBootPins();
 
     board_configSPI0();
@@ -99,10 +99,9 @@ int main(void) {
 
     /* =========== MMA8451 ================ */
     mma8451_init();
-    mma8451_setDataRate(DR_12p5hz);
+    mma8451_setDataRate(DR_100hz);
 
     mef_init();
-
 
     // ********************* Ejecución
     oled_clearScreen(OLED_COLOR_BLACK);
@@ -117,7 +116,7 @@ int main(void) {
 
 
     while(1) {
-    	mef();
+    	//mef();
 
     	if (timeDown1ms == 0)
     	{

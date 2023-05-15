@@ -311,11 +311,12 @@ void mma8451_init(void)
 
     /* Primero desactivo el acelerómetro, luego escribo otros registros*/
 
-	ctrl_reg1.ACTIVE = 0;
-	ctrl_reg1.F_READ = 0;
-	ctrl_reg1.LNOISE = 1;
-	ctrl_reg1.DR = 0B100; // ODR (Output Data Rate) de 50 Hz
-	ctrl_reg1.ASLP_RATE = 0B00;
+	//ctrl_reg1.ACTIVE = 0;
+	//ctrl_reg1.F_READ = 0;
+	//ctrl_reg1.LNOISE = 0;
+	//ctrl_reg1.DR = 0B100; // ODR (Output Data Rate)  (100) - 50 Hz
+	//ctrl_reg1.ASLP_RATE = 0B00;
+    ctrl_reg1.data = 0x20;
     mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
 
     // Configuro la detección de caída libre
@@ -332,7 +333,7 @@ void mma8451_init(void)
     mma8451_write_reg(FF_MT_THRESHOLD_ADDRESS, ff_mt_threshold.data);
 
     // Configuro el debouncer/ filtro PB
-    ff_mt_count.count = 6; //  6 cuentas o 120 ms a 50Hz ODR
+    ff_mt_count.count = 12; //  12 cuentas o 120 ms a 100Hz ODR
     mma8451_write_reg(FF_MT_COUNT_ADDRESS, ff_mt_count.data);
 
     // Habilito la interrupción por data ready y por caída libre
@@ -355,7 +356,8 @@ void mma8451_init(void)
 	ctrl_reg5.INT_CFG_ASLP = 0;
 	mma8451_write_reg(CTRL_REG5_ADDRESS, ctrl_reg5.data);
 
-	ctrl_reg1.ACTIVE = 1;
+	ctrl_reg1.data = mma8451_read_reg(CTRL_REG1_ADDRESS);
+	ctrl_reg1.data |= 0x01;
     mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
 
     config_port_int1();
@@ -400,6 +402,7 @@ int16_t mma8451_getAcZ(void)
 
 void PORTC_PORTD_IRQHandler(void)
 {
+	static unsigned int contador_interrupciones = 0;
     int16_t readG;
     INT_SOURCE_t intSource;
     STATUS_t status;
@@ -410,6 +413,10 @@ void PORTC_PORTD_IRQHandler(void)
 
     if (intSource.SRC_DRDY)
     {
+    	contador_interrupciones++;
+    	if(contador_interrupciones % 1000 == 0)
+    		PRINTF(" --- Hubo 1000 lecturas ---\n\n");
+
     	status.data = mma8451_read_reg(STATUS_ADDRESS);
     	mma8451_read_multi_reg(0x01, 6, lecturas);
 
