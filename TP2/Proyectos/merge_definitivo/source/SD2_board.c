@@ -193,7 +193,7 @@ bool board_getSw(board_swId_enum id)
     return !GPIO_PinRead(board_gpioSw[id].gpio, board_gpioSw[id].pin);
 }
 
-void board_configSPI0(){
+void board_configSPI1(){
 	const port_pin_config_t port_spi_config = {
 		/* Internal pull-up resistor is disabled */
 		.pullSelect = kPORT_PullDisable,
@@ -203,12 +203,12 @@ void board_configSPI0(){
 		.passiveFilterEnable = kPORT_PassiveFilterDisable,
 		/* Low drive strength is configured */
 		.driveStrength = kPORT_LowDriveStrength,
-		/* Pin is configured as SPI0_x */
+		/* Pin is configured as SPI1_x */
 		.mux = kPORT_MuxAlt2,
 	};
-	PORT_SetPinConfig(PORTD, 4, &port_spi_config); //SPI0_SS
-	PORT_SetPinConfig(PORTD, 5, &port_spi_config); //SPI0_SCK
-	PORT_SetPinConfig(PORTD, 6, &port_spi_config); //SPI0_MOSI
+	PORT_SetPinConfig(PORTD, 4, &port_spi_config); //SPI1_SS
+	PORT_SetPinConfig(PORTD, 5, &port_spi_config); //SPI1_SCK
+	PORT_SetPinConfig(PORTD, 6, &port_spi_config); //SPI1_MOSI
 
 	CLOCK_EnableClock(kCLOCK_Spi1);
 

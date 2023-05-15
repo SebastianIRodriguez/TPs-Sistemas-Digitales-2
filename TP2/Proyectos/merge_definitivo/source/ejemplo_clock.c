@@ -50,110 +50,91 @@
 
 static uint32_t timeDown1ms;
 
-int main(void) {
+int main(void)
+{
+  // Init FSL debug console.
+  BOARD_InitDebugConsole();
 
-	uint32_t freq = 0;
-	smc_power_state_t currentPowerState;
+  uint32_t freq = 0;
+  smc_power_state_t currentPowerState;
 
-	PRINTF("\r\n####################  TP2 Raffagnini Rodriguez - SD2 ####################\n\r\n");
+  PRINTF("\r\n####################  TP2 Raffagnini Rodriguez - SD2 ####################\n\r\n");
 
-	currentPowerState = SMC_GetPowerModeState(SMC);
-	APP_ShowPowerMode(currentPowerState);
-	PRINTF("    Clock luego del Reset\n");
+  currentPowerState = SMC_GetPowerModeState(SMC);
+  APP_ShowPowerMode(currentPowerState);
+  PRINTF("    Clock luego del Reset\n");
 
-	freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
-	PRINTF("    Core Clock = %dMHz \r\r", freq/1000000);
+  freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
+  PRINTF("    Core Clock = %dMHz \r\r", freq / 1000000);
 
-	/* Se configuran los clocks a máxima frecuencia */
-    BOARD_InitBootClocks();
+  BOARD_InitBootClocks();                                  // Se configuran los clocks a máxima frecuencia
+  SMC_SetPowerModeProtection(SMC, kSMC_AllowPowerModeAll); // Se habilita la posibilidad de operar con todos los modos de bajo consumo
 
-    /* Se habilita la posibilidad de operar con todos los modos de bajo consumo */
-    SMC_SetPowerModeProtection(SMC, kSMC_AllowPowerModeAll);
+  PRINTF("    Clock a max. frec.\n");
+  freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
+  PRINTF("    Core Clock = %dMHz \r\r", freq / 1000000);
 
-    PRINTF("    Clock a max. frec.\n");
-    freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
-    PRINTF("    Core Clock = %dMHz \r\r", freq/1000000);
+  // =========== Inicializaciones varias ===================
+  board_init();                            // Funciones de la placa
+  key_init();                              // MEF de pulsadores
+  SysTick_Config(SystemCoreClock / 1000U); // Interrupción de systick
 
-    /* Init FSL debug console. */
-    BOARD_InitDebugConsole();
+  // =========== SPI ===================
+  board_configSPI1();
 
-    /* Se inicializa funciones de la placa */
-    board_init();
+  // =========== OLED ===================
+  oled_init();
+  oled_setContrast(16);
+  oled_clearScreen(OLED_COLOR_BLACK);
 
-    /* Se inicializa la MEF de pulsadores*/
-    key_init();
+  // =========== I2C ===================
+  SD2_I2C_init();
 
-    /* Se configura interrupción de systick */
-    SysTick_Config(SystemCoreClock / 1000U);
+  // =========== MMA8451 ================
+  mma8451_init();
+  mma8451_setDataRate(DR_100hz);
+  print_accel_display_state(1281);
 
-    //BOARD_InitBootClocks();
-    //BOARD_InitBootPins();
+  // ****************** EJECUCIÓN
+  mef_init();
 
-    board_configSPI0();
-
-    oled_init();
-    oled_setContrast(16);
-
-    /* =========== I2C =================== */
-    SD2_I2C_init();
-
-    /* =========== MMA8451 ================ */
-    mma8451_init();
-    mma8451_setDataRate(DR_100hz);
-
-    mef_init();
-
-    // ********************* Ejecución
-    oled_clearScreen(OLED_COLOR_BLACK);
-
-    /* Drawing */
-    //oled_fillRect(32, 16, 32+64, 16+32, OLED_COLOR_WHITE);
-    //oled_fillRect(32+8, 16+8, 32+64-8, 16+32-8, OLED_COLOR_BLACK);
-    //oled_putString(56, 29, (uint8_t *)"Hola :D", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    //print_falling_state();
-    print_accel_display_state(1281);
-    //oled_circle(64, 32, 31, OLED_COLOR_WHITE);
-
-
-    while(1) {
-    	//mef();
-
-    	if (timeDown1ms == 0)
-    	{
-    		timeDown1ms = 100;
-    		board_setLed(BOARD_LED_ID_ROJO, BOARD_LED_MSG_TOGGLE);
-    	}
-
-    	if (key_getPressEv(BOARD_SW_ID_1))
-    	{
-    		APP_PowerModeSwitch(kSMC_PowerStateVlpr, kAPP_PowerModeRun);
-
-    		currentPowerState = SMC_GetPowerModeState(SMC);
-    		APP_ShowPowerMode(currentPowerState);
-
-    		freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
-    		PRINTF("    Core Clock = %dMHz \r\r", freq/1000000);
-    	}
-
-    	if (key_getPressEv(BOARD_SW_ID_3))
-		{
-    		APP_PowerModeSwitch(kSMC_PowerStateRun, kAPP_PowerModeVlpr);
-
-    		currentPowerState = SMC_GetPowerModeState(SMC);
-    		APP_ShowPowerMode(currentPowerState);
-
-    		freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
-    		PRINTF("    Core Clock = %dMHz \r\r", freq/1000000);
-		}
+  while (1)
+  {
+    mef_run();
+    /*
+    if (timeDown1ms == 0)
+    {
+      timeDown1ms = 100;
+      board_setLed(BOARD_LED_ID_ROJO, BOARD_LED_MSG_TOGGLE);
     }
 
-    return 0;
+    if (key_getPressEv(BOARD_SW_ID_1))
+    {
+      APP_PowerModeSwitch(kSMC_PowerStateVlpr, kAPP_PowerModeRun);
+
+      currentPowerState = SMC_GetPowerModeState(SMC);
+      APP_ShowPowerMode(currentPowerState);
+
+      freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
+      PRINTF("    Core Clock = %dMHz \r\r", freq / 1000000);
+    }
+
+    if (key_getPressEv(BOARD_SW_ID_3))
+    {
+      APP_PowerModeSwitch(kSMC_PowerStateRun, kAPP_PowerModeVlpr);
+
+      currentPowerState = SMC_GetPowerModeState(SMC);
+      APP_ShowPowerMode(currentPowerState);
+
+      freq = CLOCK_GetFreq(kCLOCK_CoreSysClk);
+      PRINTF("    Core Clock = %dMHz \r\r", freq / 1000000);
+    }*/
+  }
+
+  return 0;
 }
 
 void SysTick_Handler(void)
 {
-	if (timeDown1ms)
-		timeDown1ms--;
-
-    key_periodicTask1ms();
+  mef_periodicTask1ms();
 }

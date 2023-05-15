@@ -400,6 +400,14 @@ int16_t mma8451_getAcZ(void)
 	return (int16_t)(((int32_t)readZ * 100) / (int32_t)4096);
 }
 
+static bool is_falling = false;
+
+bool mma8451_getIsFalling() {
+    bool temp = is_falling;
+    is_falling = false;
+    return temp;
+}
+
 void PORTC_PORTD_IRQHandler(void)
 {
 	static unsigned int contador_interrupciones = 0;
@@ -445,6 +453,7 @@ void PORTC_PORTD_IRQHandler(void)
     {
     	mma8451_read_reg(FF_MT_SRC_ADDRESS); // Limpio la bandera
     	PRINTF("AYUDA ME CAIGOOOOO\n");
+        is_falling = true;
     }
 
     PORT_ClearPinsInterruptFlags(INT1_PORT, 1<<INT1_PIN);
