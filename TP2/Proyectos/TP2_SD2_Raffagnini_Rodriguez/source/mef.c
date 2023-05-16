@@ -136,7 +136,7 @@ int mef_run(void)
 
         if (tim_led <= 0)
         {
-            tim_led = 50;
+            tim_led = 250;
             board_setLed(BOARD_LED_ID_ROJO, BOARD_LED_MSG_TOGGLE);
         }
     }

@@ -128,6 +128,44 @@ static void I2C_releaseBus(void)
     i2c_release_bus_delay();
 }
 
+void I2C_release(void)
+{
+    uint8_t i = 0;
+
+    /* Drive SDA low first to simulate a start */
+    GPIO_PinWrite(I2C_RELEASE_SDA_GPIO, I2C_RELEASE_SDA_PIN, 0U);
+    i2c_release_bus_delay();
+
+    /* Send 9 pulses on SCL and keep SDA high */
+    for (i = 0; i < 9; i++)
+    {
+        GPIO_PinWrite(I2C_RELEASE_SCL_GPIO, I2C_RELEASE_SCL_PIN, 0U);
+        i2c_release_bus_delay();
+
+        GPIO_PinWrite(I2C_RELEASE_SDA_GPIO, I2C_RELEASE_SDA_PIN, 1U);
+        i2c_release_bus_delay();
+
+        GPIO_PinWrite(I2C_RELEASE_SCL_GPIO, I2C_RELEASE_SCL_PIN, 1U);
+        i2c_release_bus_delay();
+        i2c_release_bus_delay();
+    }
+
+    /* Send stop */
+    GPIO_PinWrite(I2C_RELEASE_SCL_GPIO, I2C_RELEASE_SCL_PIN, 0U);
+    i2c_release_bus_delay();
+
+    GPIO_PinWrite(I2C_RELEASE_SDA_GPIO, I2C_RELEASE_SDA_PIN, 0U);
+    i2c_release_bus_delay();
+
+    GPIO_PinWrite(I2C_RELEASE_SCL_GPIO, I2C_RELEASE_SCL_PIN, 1U);
+    i2c_release_bus_delay();
+
+    GPIO_PinWrite(I2C_RELEASE_SDA_GPIO, I2C_RELEASE_SDA_PIN, 1U);
+    i2c_release_bus_delay();
+}
+
+
+
 static void I2C_configPins(void)
 {
 	const port_pin_config_t porte24_pin31_config = {/* Internal pull-up resistor is enabled */

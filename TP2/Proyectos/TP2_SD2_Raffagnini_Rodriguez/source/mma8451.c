@@ -265,7 +265,7 @@ static void mma8451_write_reg(uint8_t addr, uint8_t data)
 
 /*==================[internal data definition]===============================*/
 static bool is_falling = false;
-static bool dr_irq_enable = false;
+//static bool dr_irq_enable = false;
 
 /*==================[external data definition]===============================*/
 
@@ -316,7 +316,7 @@ void mma8451_init(void)
 	ctrl_reg1.ACTIVE = 0;
 	ctrl_reg1.F_READ = 0;
 	ctrl_reg1.LNOISE = 1;
-	ctrl_reg1.DR = 0B100; // ODR (Output Data Rate)  (100) - 50 Hz
+	ctrl_reg1.DR = 0B011; // ODR (Output Data Rate)  (011) - 100 Hz
 	ctrl_reg1.ASLP_RATE = 0B00;
     //ctrl_reg1.data = 0x20;
     mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
@@ -338,7 +338,7 @@ void mma8451_init(void)
     ff_mt_count.count = 12; //  12 cuentas o 120 ms a 100Hz ODR
     mma8451_write_reg(FF_MT_COUNT_ADDRESS, ff_mt_count.data);
 
-    // Habilito la interrupción por data ready y por caída libre
+    // Habilito la interrupción por caída libre
 	ctrl_reg4.INT_EN_DRDY = 0;
 	ctrl_reg4.INT_EN_FF_MT = 1;
 	ctrl_reg4.INT_EN_PULSE = 0;
@@ -358,6 +358,7 @@ void mma8451_init(void)
 	ctrl_reg5.INT_CFG_ASLP = 0;
 	mma8451_write_reg(CTRL_REG5_ADDRESS, ctrl_reg5.data);
 
+	// Pongo en active el dispositivo
 	ctrl_reg1.data = mma8451_read_reg(CTRL_REG1_ADDRESS);
 	ctrl_reg1.data |= 0x01;
     mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
@@ -389,7 +390,7 @@ void mma8451_setDataRate(DR_enum rate)
 
 void mma8451_enable_DR_IRQ()
 {
-		dr_irq_enable = true;
+		//dr_irq_enable = true;
 		CTRL_REG1_t ctr_reg1;
 		CTRL_REG4_t ctr_reg4;
 		bool estAct;
@@ -435,7 +436,7 @@ void mma8451_disable_DR_IRQ()
 		ctr_reg1.ACTIVE = estAct;
 		mma8451_write_reg(CTRL_REG1_ADDRESS, ctr_reg1.data);
 
-		dr_irq_enable = false;
+		//dr_irq_enable = false;
 }
 
 int16_t mma8451_getAcX(void)
@@ -469,17 +470,8 @@ void PORTC_PORTD_IRQHandler(void)
     STATUS_t status;
     uint8_t lecturas[6];
 
-    //intSource.data = mma8451_read_reg(INT_SOURCE_ADDRESS);
+    intSource.data = mma8451_read_reg(INT_SOURCE_ADDRESS);
 
-    if(dr_irq_enable)
-    {
-    	intSource.data = mma8451_read_reg(INT_SOURCE_ADDRESS);
-    }
-    else
-    {
-    	intSource.SRC_DRDY = 0;
-    	intSource.SRC_FF_MT = 1;
-    }
 
     if (intSource.SRC_DRDY)
     {
