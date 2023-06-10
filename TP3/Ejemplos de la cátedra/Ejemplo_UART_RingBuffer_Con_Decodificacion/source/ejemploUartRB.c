@@ -77,10 +77,10 @@ int main(void)
 	uart_ringBuffer_init();
 
     while(1) {
-        if (uart_available_bytes_to_read() >= 9) {
-            ret = uart_ringBuffer_recDatos(buffer, 9, 0);
+        if (uart_available_bytes_to_read() >= 6) {
+            ret = uart_ringBuffer_recDatos(buffer, 6, 0);
 
-            if (ret == 9) {
+            if (ret == 6) {
                 uint8_t received_message_type = buffer[3];
                 uint8_t received_message_id = buffer[4];
 
@@ -115,7 +115,7 @@ int main(void)
 **/
 void NUESTROTP_process_led_action_request(uint8_t* buffer, uint8_t received_message_id) {
     //Leer el ultimo byte que falta, ya que estos paquetes tienen 10 bytes en vez de 9
-    int read_bytes = uart_ringBuffer_recDatos(buffer, 1, 9);
+    int read_bytes = uart_ringBuffer_recDatos(buffer, 1, 7);
     
     if (read_bytes < 1) 
         return;
@@ -141,7 +141,7 @@ void NUESTROTP_process_led_action_request(uint8_t* buffer, uint8_t received_mess
     }
 
     //Envio el mensaje tal cual lo recibi
-    uart_ringBuffer_envDatos(buffer, 10);
+    uart_ringBuffer_envDatos(buffer, 7);
 }
 
 /**
@@ -166,12 +166,9 @@ void NUESTROTP_process_switch_state_request(uint8_t* buffer, uint8_t received_me
     }
 
     buffer[5] = (requested_sw_state) ? 'P' : 'N';
-    buffer[6] = '\'';
-    buffer[7] = 'L';
-    buffer[8] = 'F';
-    buffer[9] = '\'';
+    buffer[6] = 0x0A;
 
-    uart_ringBuffer_envDatos(buffer, 10);
+    uart_ringBuffer_envDatos(buffer, 7);
 }
 
 /**
@@ -180,25 +177,9 @@ void NUESTROTP_process_switch_state_request(uint8_t* buffer, uint8_t received_me
  */
 void NUESTROTP_process_acceleration_request(uint8_t* buffer) {
     //TODO: obtener medicion del acelerometro
-    
-    buffer[5] = '+';
-    buffer[6] = '1';
-    buffer[7] = '2';
-    buffer[8] = '3';
-    buffer[9] = '-';
-    buffer[10] = '4';
-    buffer[11] = '5';
-    buffer[12] = '6';
-    buffer[13] = '+';
-    buffer[14] = '7';
-    buffer[15] = '8';
-    buffer[16] = '9';
-    buffer[17] = '\'';
-    buffer[18] = 'L';
-    buffer[19] = 'F';
-    buffer[20] = '\'';
+    sprintf(buffer, ":2321+123-456+789\n");
 
-    uart_ringBuffer_envDatos(buffer, 21);
+    uart_ringBuffer_envDatos(buffer, 18);
 }
 
 /*==================[end of file]============================================*/
