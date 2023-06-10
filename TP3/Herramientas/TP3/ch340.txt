@@ -1,0 +1,3 @@
+Para que ubuntu 22 reconozca el ch340 ejecutar
+sudo apt remove brltty
+
