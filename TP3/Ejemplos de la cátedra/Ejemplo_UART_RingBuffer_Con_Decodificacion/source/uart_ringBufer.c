@@ -58,7 +58,7 @@ void uart_ringBuffer_init(void)
 	lpuart_config_t config;
 
     pRingBufferRx = ringBuffer_init(16);
-    pRingBufferTx = ringBuffer_init(16);
+    pRingBufferTx = ringBuffer_init(18);
 
     CLOCK_SetLpuart0Clock(0x1U); //IRC48M clock
 

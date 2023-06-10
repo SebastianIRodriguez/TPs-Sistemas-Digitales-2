@@ -61,50 +61,7 @@
 #define LED_GREEN_MESSAGE_ID '2'
 
 #define SW1_MESSAGE_ID '1'
-#define SW3_MESSAGE_ID '2'
-
-int main(void)
-{
-    int32_t ret;
-    uint8_t buffer[21];
-
-	BOARD_BootClockRUN();
-
-	// Se inicializan funciones de la placa
-	board_init();
-
-	// Se inicializa UART0 con ring buffer
-	uart_ringBuffer_init();
-
-    while(1) {
-        if (uart_available_bytes_to_read() >= 6) {
-            ret = uart_ringBuffer_recDatos(buffer, 6, 0);
-
-            if (ret == 6) {
-                uint8_t received_message_type = buffer[3];
-                uint8_t received_message_id = buffer[4];
-
-                switch (received_message_type) {
-                    case LED_ACTION_MESSAGE:
-                        while (uart_available_bytes_to_read() < 1); //Espero a que llegue el byte que me falta
-                        NUESTROTP_process_led_action_request(buffer, received_message_id);
-                        break;
-
-                    case SW_STATE_MESSAGE:
-                        NUESTROTP_process_switch_state_request(buffer, received_message_id);
-                        break;
-
-                    case ACCEL_STATE_MESSAGE:
-                        NUESTROTP_process_acceleration_request(buffer, received_message_id);
-                        break;
-                
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-}
+#define SW3_MESSAGE_ID '3'
 
 /** 
  *  LED ROJO
@@ -180,6 +137,49 @@ void NUESTROTP_process_acceleration_request(uint8_t* buffer) {
     sprintf(buffer, ":2321+123-456+789\n");
 
     uart_ringBuffer_envDatos(buffer, 18);
+}
+
+int main(void)
+{
+    int32_t ret;
+    uint8_t buffer[21];
+
+	BOARD_BootClockRUN();
+
+	// Se inicializan funciones de la placa
+	board_init();
+
+	// Se inicializa UART0 con ring buffer
+	uart_ringBuffer_init();
+
+    while(1) {
+        if (uart_available_bytes_to_read() >= 6) {
+            ret = uart_ringBuffer_recDatos(buffer, 6, 0);
+
+            if (ret == 6) {
+                uint8_t received_message_type = buffer[3];
+                uint8_t received_message_id = buffer[4];
+
+                switch (received_message_type) {
+                    case LED_ACTION_MESSAGE:
+                        while (uart_available_bytes_to_read() < 1); //Espero a que llegue el byte que me falta
+                        NUESTROTP_process_led_action_request(buffer, received_message_id);
+                        break;
+
+                    case SW_STATE_MESSAGE:
+                        NUESTROTP_process_switch_state_request(buffer, received_message_id);
+                        break;
+
+                    case ACCEL_STATE_MESSAGE:
+                        NUESTROTP_process_acceleration_request(buffer);
+                        break;
+                
+                    default:
+                        break;
+                }
+            }
+        }
+    }
 }
 
 /*==================[end of file]============================================*/
