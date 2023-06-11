@@ -100,7 +100,7 @@ bool ringBuffer_isEmpty(void *pRb);
  ** \param[inout] pRb puntero al buffer circular
  ** \return cantidad de datos en el buffer
  */
-int32_t ringBuffer_getCount(void *pRb)
+int32_t ringBuffer_getCount(void *pRb);
 
 
 
