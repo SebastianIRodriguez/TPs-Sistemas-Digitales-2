@@ -31,8 +31,8 @@
  *
  */
 
-#ifndef UART0_DRV_H_
-#define UART0_DRV_H_
+#ifndef UART1_RS485_H_
+#define UART1_RS485_H_
 
 /*==================[inclusions]=============================================*/
 #include "stdint.h"
@@ -51,7 +51,7 @@ extern "C" {
 
 /*==================[external functions definition]==========================*/
 
-void uart0_drv_init(void);
+void rs485_drv_init(void);
 
 /** \brief recibe datos por puerto serie accediendo al RB
  **
@@ -59,7 +59,7 @@ void uart0_drv_init(void);
  ** \param[in] size tamaño del buffer
  ** \return cantidad de bytes recibidos
  **/
-int32_t uart0_drv_recDatos(uint8_t *pBuf, int32_t size);
+int32_t rs485_drv_recDatos(uint8_t *pBuf, int32_t size);
 
 /** \brief envía datos por puerto serie vía DMA
  **
@@ -67,7 +67,7 @@ int32_t uart0_drv_recDatos(uint8_t *pBuf, int32_t size);
  ** \param[in] size tamaño del buffer
  ** \return cantidad de bytes enviados
  **/
-int32_t uart0_drv_envDatos(uint8_t *pBuf, int32_t size);
+int32_t rs485_drv_envDatos(uint8_t *pBuf, int32_t size);
 
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus

@@ -46,12 +46,11 @@
 #include "MKL43Z4.h"
 #include "pin_mux.h"
 #include "uart0_drv.h"
+#include "rs485_drv.h"
 #include "mma8451.h"
 #include "SD2_I2C.h"
 
 
-#define _UMBRAL_EJE_X_POSITIVO 50
-#define _UMBRAL_EJE_X_NEGATIVO -50
 #define _RETARDO_MSEG 100
 
 /*==================[macros and definitions]=================================*/
@@ -68,7 +67,7 @@
 
 /*==================[external functions definition]==========================*/
 
-long cuenta;
+long cuenta = 2000;
 int total = 0;
 
 int main(void)
@@ -91,6 +90,9 @@ int main(void)
 	//Inicializa driver de UART0
 	uart0_drv_init();
 
+	//Inicializa driver de UART1
+	rs485_drv_init();
+
 	//inicializa interrupción de systick cada 1 ms
 	SysTick_Config(SystemCoreClock / 1000U);
 
@@ -105,20 +107,21 @@ int main(void)
 		//Lee valor de aceleración del eje X
 	    acc = mma8451_getAcX();
 
-        uint8_t ret = uart0_drv_recDatos(buffer0_rx, sizeof(buffer0_rx));
+        uint8_t ret = rs485_drv_recDatos(buffer0_rx, sizeof(buffer0_rx));
 
         buffer0_rx[ret] = 0;
 
         for(int i = 0; i < ret; i++, total ++)
         	buffer0_analisis[total] = buffer0_rx[i];
 
-        if (total > 20)
+        if (total > 10)
         {
         	buffer0_analisis[total] = 0;
         	sprintf((char*)buffer0_tx, "- %s EJE X:%d \r\n", buffer0_analisis, acc);
-        	uart0_drv_envDatos(buffer0_tx, strlen((char*)buffer0_tx));
+        	rs485_drv_envDatos(buffer0_tx, strlen((char*)buffer0_tx));
         	total = 0;
         }
+
 
         if(kLPUART_RxOverrunFlag & LPUART_GetStatusFlags(LPUART0))
         	board_setLed(BOARD_LED_ID_ROJO, BOARD_LED_MSG_ON);
@@ -134,8 +137,14 @@ int main(void)
 
 void SysTick_Handler(void)
 {
-   if(cuenta!=0)
-	   cuenta--;
+	cuenta--;
+
+   if(cuenta <= 0)
+   {
+	   cuenta = 2000;
+	   char mensaje[] = "Probando UART0!\n";
+	   uart0_drv_envDatos((uint8_t *)mensaje, strlen(mensaje));
+   }
 }
 
 

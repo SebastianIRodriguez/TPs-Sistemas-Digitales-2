@@ -53,11 +53,11 @@
 /*==================[macros and definitions]=================================*/
 #define LPUART_TX_DMA_CHANNEL 0U
 
-#define TX_BUFFER_DMA_SIZE  32
-#define RX_RINGBUFFER_SIZE  32
+#define TX0_BUFFER_DMA_SIZE  32
+#define RX0_RINGBUFFER_SIZE  32
 
 /*==================[internal data declaration]==============================*/
-static uint8_t txBuffer_dma[TX_BUFFER_DMA_SIZE];
+static uint8_t txBuffer_dma[TX0_BUFFER_DMA_SIZE];
 static lpuart_dma_handle_t LPUARTDmaHandle;
 static dma_handle_t LPUARTTxDmaHandle;
 volatile bool txOnGoing = false;
@@ -84,7 +84,7 @@ void uart0_drv_init(void)
 {
     lpuart_config_t config;
 
-    pRingBufferRx = ringBuffer_init(RX_RINGBUFFER_SIZE);
+    pRingBufferRx = ringBuffer_init(RX0_RINGBUFFER_SIZE);
 
     CLOCK_SetLpuart0Clock(0x1U);
 
@@ -181,8 +181,8 @@ int32_t uart0_drv_envDatos(uint8_t *pBuf, int32_t size)
     else
     {
         /* limita size */
-        if (size > TX_BUFFER_DMA_SIZE)
-            size = TX_BUFFER_DMA_SIZE;
+        if (size > TX0_BUFFER_DMA_SIZE)
+            size = TX0_BUFFER_DMA_SIZE;
 
         // Hace copia del buffer a transmitir en otro arreglo
         memcpy(txBuffer_dma, pBuf, size);

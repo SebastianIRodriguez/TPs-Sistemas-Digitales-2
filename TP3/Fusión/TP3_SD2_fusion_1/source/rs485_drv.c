@@ -47,25 +47,35 @@
 #include "board.h"
 #include "MKL43Z4.h"
 #include "pin_mux.h"
-#include "uart0_drv.h"
+#include "rs485_drv.h"
 #include "ringBuffer.h"
 
 /*==================[macros and definitions]=================================*/
-#define LPUART_TX_DMA_CHANNEL 0U
+#define LPUART_TX_DMA_CHANNEL 1U
 
-#define TX_BUFFER_DMA_SIZE  32
-#define RX_RINGBUFFER_SIZE  32
+#define RS485_UART                  LPUART1
+#define RS485_UART_IRQn             LPUART1_IRQn
+
+#define TX1_BUFFER_DMA_SIZE  32
+#define RX1_RINGBUFFER_SIZE  32
 
 /*==================[internal data declaration]==============================*/
-static uint8_t txBuffer_dma[TX_BUFFER_DMA_SIZE];
+static uint8_t txBuffer_dma[TX1_BUFFER_DMA_SIZE];
 static lpuart_dma_handle_t LPUARTDmaHandle;
 static dma_handle_t LPUARTTxDmaHandle;
-volatile bool txOnGoing = false;
+volatile bool tx485OnGoing = false;
 static void* pRingBufferRx;
 
 /*==================[internal functions declaration]=========================*/
 
-/*==================[external data definition]===============================*/
+/*==================[internal data declaration]==============================*/
+static const board_gpioInfo_type board_gpioContLine[] =
+{
+    {PORTE, GPIOE, 29},    /* RE */
+    {PORTE, GPIOE, 30},    /* DE */
+};
+
+static bool dataAvailable;
 
 /*==================[internal functions definition]==========================*/
 
@@ -74,52 +84,100 @@ static void LPUART_UserCallback(LPUART_Type *base, lpuart_dma_handle_t *handle, 
 {
     if (kStatus_LPUART_TxIdle == status)
     {
-        txOnGoing = false;
+        tx485OnGoing = false;
     }
+}
+
+static void rs485_RE(bool est)
+{
+    if (est)
+    	GPIO_PortSet(board_gpioContLine[0].gpio, 1<<board_gpioContLine[0].pin);
+    else
+    	GPIO_PortClear(board_gpioContLine[0].gpio, 1<<board_gpioContLine[0].pin);
+}
+
+static void rs485_DE(bool est)
+{
+    if (est)
+    	GPIO_PortSet(board_gpioContLine[1].gpio, 1<<board_gpioContLine[1].pin);
+    else
+    	GPIO_PortClear(board_gpioContLine[1].gpio, 1<<board_gpioContLine[1].pin);
 }
 
 /*==================[external functions definition]==========================*/
 
-void uart0_drv_init(void)
+void rs485_drv_init(void)
 {
-    lpuart_config_t config;
 
-    pRingBufferRx = ringBuffer_init(RX_RINGBUFFER_SIZE);
+	// ****  Buffer circular de recepción
+    pRingBufferRx = ringBuffer_init(RX1_RINGBUFFER_SIZE);
 
-    CLOCK_SetLpuart0Clock(0x1U);
+    // ****  Pines RE/DE
+	int32_t i;
+	gpio_pin_config_t gpio_config =
+	{
+		.outputLogic = 1,
+		.pinDirection = kGPIO_DigitalOutput,
+	};
 
-    /* PORTA1 (pin 35) is configured as LPUART0_RX */
-    PORT_SetPinMux(PORTA, 1U, kPORT_MuxAlt2);
+	const port_pin_config_t port_config = {
+			/* Internal pull-up/down resistor is disabled */
+		.pullSelect = kPORT_PullDisable,
+		/* Slow slew rate is configured */
+		.slewRate = kPORT_SlowSlewRate,
+		/* Passive filter is disabled */
+		.passiveFilterEnable = kPORT_PassiveFilterDisable,
+		/* Low drive strength is configured */
+		.driveStrength = kPORT_LowDriveStrength,
+		/* Pin is configured as PTC3 */
+		.mux = kPORT_MuxAsGpio,
+	};
 
-    /* PORTA2 (pin 36) is configured as LPUART0_TX */
-    PORT_SetPinMux(PORTA, 2U, kPORT_MuxAlt2);
+	lpuart_config_t config;
+
+    /* inicialización de pines de control */
+    for (i = 0 ; i < 2 ; i++)
+	{
+		PORT_SetPinConfig(board_gpioContLine[i].port, board_gpioContLine[i].pin, &port_config);
+		GPIO_PinInit(board_gpioContLine[i].gpio, board_gpioContLine[i].pin, &gpio_config);
+	}
+
+    rs485_RE(false);
+    rs485_DE(false);
 
     /*
-     * config.parityMode = kLPUART_ParityDisabled;
-     * config.stopBitCount = kLPUART_OneStopBit;
-     * config.enableTx = false;
-     * config.enableRx = false;
-     */
-    LPUART_GetDefaultConfig(&config);
-    config.baudRate_Bps = 115200;
-    config.parityMode = kLPUART_ParityDisabled;
-    config.stopBitCount = kLPUART_OneStopBit;
-    config.enableTx = true;
-    config.enableRx = true;
+	 * config.baudRate_Bps = 115200U;
+	 * config.parityMode = kUART_ParityDisabled;
+	 * config.stopBitCount = kUART_OneStopBit;
+	 * config.txFifoWatermark = 0;
+	 * config.rxFifoWatermark = 1;
+	 * config.enableTx = false;
+	 * config.enableRx = false;
+	 */
+	LPUART_GetDefaultConfig(&config);
+	config.baudRate_Bps = 115200;
+	config.enableTx = true;
+	config.enableRx = true;
 
-    LPUART_Init(LPUART0, &config, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+	LPUART_Init(RS485_UART, &config, CLOCK_GetFreq(SYS_CLK));
 
-    /* Habilita interrupciones */
-    LPUART_EnableInterrupts(LPUART0, kLPUART_RxDataRegFullInterruptEnable);
-    LPUART_EnableInterrupts(LPUART0, kLPUART_TransmissionCompleteInterruptEnable);
-    EnableIRQ(LPUART0_IRQn);
+	/* Configura los pines RX y TX de la UART1 */
+	PORT_SetPinMux(PORTE, 0U, kPORT_MuxAlt3);
+	PORT_SetPinMux(PORTE, 1U, kPORT_MuxAlt3);
+
+    dataAvailable = false;
+
+    LPUART_EnableInterrupts(RS485_UART, kLPUART_RxDataRegFullInterruptEnable);
+    LPUART_EnableInterrupts(RS485_UART, kLPUART_TransmissionCompleteInterruptEnable);
+
+    NVIC_EnableIRQ(LPUART1_IRQn);
 
     /***************** CONFIGURACIÓN DMA (sólo para TX) *******************/
     /* Init DMAMUX */
     DMAMUX_Init(DMAMUX0);
 
     /* Set channel for LPUART  */
-    DMAMUX_SetSource(DMAMUX0, LPUART_TX_DMA_CHANNEL, kDmaRequestMux0LPUART0Tx);
+    DMAMUX_SetSource(DMAMUX0, LPUART_TX_DMA_CHANNEL, kDmaRequestMux0LPUART1Tx);
     DMAMUX_EnableChannel(DMAMUX0, LPUART_TX_DMA_CHANNEL);
 
     /* Init the DMA module */
@@ -128,7 +186,7 @@ void uart0_drv_init(void)
 
     /* Create LPUART DMA handle. */
     LPUART_TransferCreateHandleDMA(
-            LPUART0,
+            RS485_UART,
             &LPUARTDmaHandle,
             LPUART_UserCallback,
             NULL,
@@ -143,12 +201,12 @@ void uart0_drv_init(void)
  ** \param[in] size tamaño del buffer
  ** \return cantidad de bytes recibidos
  **/
-int32_t uart0_drv_recDatos(uint8_t *pBuf, int32_t size)
+int32_t rs485_drv_recDatos(uint8_t *pBuf, int32_t size)
 {
     int32_t ret = 0;
 
     /* entra sección de código crítico */
-    NVIC_DisableIRQ(LPUART0_IRQn);
+    NVIC_DisableIRQ(LPUART1_IRQn);
 
     while (!ringBuffer_isEmpty(pRingBufferRx) && ret < size)
     {
@@ -157,7 +215,7 @@ int32_t uart0_drv_recDatos(uint8_t *pBuf, int32_t size)
     }
 
     /* sale de sección de código crítico */
-    NVIC_EnableIRQ(LPUART0_IRQn);
+    NVIC_EnableIRQ(LPUART1_IRQn);
 
     return ret;
 }
@@ -170,57 +228,62 @@ int32_t uart0_drv_recDatos(uint8_t *pBuf, int32_t size)
  ** \return cantidad de bytes enviados
  **/
 
-int32_t uart0_drv_envDatos(uint8_t *pBuf, int32_t size)
+int32_t rs485_drv_envDatos(uint8_t *pBuf, int32_t size)
 {
     lpuart_transfer_t xfer;
 
-    if (txOnGoing)
+    if (tx485OnGoing)
     {
         size = 0;
     }
     else
     {
         /* limita size */
-        if (size > TX_BUFFER_DMA_SIZE)
-            size = TX_BUFFER_DMA_SIZE;
+        if (size > TX1_BUFFER_DMA_SIZE)
+            size = TX1_BUFFER_DMA_SIZE;
 
         // Hace copia del buffer a transmitir en otro arreglo
         memcpy(txBuffer_dma, pBuf, size);
 
+        rs485_RE(true);
+        rs485_DE(true);
+
         xfer.data = txBuffer_dma;
         xfer.dataSize = size;
 
-        txOnGoing = true;
-        LPUART_TransferSendDMA(LPUART0, &LPUARTDmaHandle, &xfer);
+        tx485OnGoing = true;
 
-        LPUART_EnableInterrupts(LPUART0, kLPUART_TransmissionCompleteInterruptEnable);
+        LPUART_TransferSendDMA(RS485_UART, &LPUARTDmaHandle, &xfer);
+        LPUART_EnableInterrupts(RS485_UART, kLPUART_TransmissionCompleteInterruptEnable);
     }
 
     return size;
 }
 
 
-void LPUART0_IRQHandler(void)
+void LPUART1_IRQHandler(void)
 {
 	uint8_t data;
 
 	// **** Recepción
-    if ( (kLPUART_RxDataRegFullFlag)            & LPUART_GetStatusFlags(LPUART0) &&
-         (kLPUART_RxDataRegFullInterruptEnable) & LPUART_GetEnabledInterrupts(LPUART0) )
+    if ( (kLPUART_RxDataRegFullFlag)            & LPUART_GetStatusFlags(RS485_UART) &&
+         (kLPUART_RxDataRegFullInterruptEnable) & LPUART_GetEnabledInterrupts(RS485_UART) )
 	{
         /* obtiene dato recibido por puerto serie */
-	    data = LPUART_ReadByte(LPUART0);
+	    data = LPUART_ReadByte(RS485_UART);
 
 		/* pone dato en ring buffer */
 		ringBuffer_putData(pRingBufferRx, data);
 	}
 
     // **** Transmisión
-    if ( (kLPUART_TransmissionCompleteFlag)            & LPUART_GetStatusFlags(LPUART0) &&
-         (kLPUART_TransmissionCompleteInterruptEnable) & LPUART_GetEnabledInterrupts(LPUART0) )
+    if ( (kLPUART_TransmissionCompleteFlag)            & LPUART_GetStatusFlags(RS485_UART) &&
+         (kLPUART_TransmissionCompleteInterruptEnable) & LPUART_GetEnabledInterrupts(RS485_UART) )
     {
-        LPUART_DisableInterrupts(LPUART0, kLPUART_TransmissionCompleteInterruptEnable);
-        LPUART_ClearStatusFlags(LPUART0, kLPUART_TransmissionCompleteFlag);
+        LPUART_DisableInterrupts(RS485_UART, kLPUART_TransmissionCompleteInterruptEnable);
+        LPUART_ClearStatusFlags(RS485_UART, kLPUART_TransmissionCompleteFlag);
+        rs485_RE(false);
+        rs485_DE(false);
     }
 
 }

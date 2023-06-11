@@ -10,6 +10,7 @@ C_SRCS += \
 ../source/mma8451.c \
 ../source/mtb.c \
 ../source/ringBuffer.c \
+../source/rs485_drv.c \
 ../source/semihost_hardfault.c \
 ../source/uart0_drv.c 
 
@@ -20,6 +21,7 @@ OBJS += \
 ./source/mma8451.o \
 ./source/mtb.o \
 ./source/ringBuffer.o \
+./source/rs485_drv.o \
 ./source/semihost_hardfault.o \
 ./source/uart0_drv.o 
 
@@ -30,6 +32,7 @@ C_DEPS += \
 ./source/mma8451.d \
 ./source/mtb.d \
 ./source/ringBuffer.d \
+./source/rs485_drv.d \
 ./source/semihost_hardfault.d \
 ./source/uart0_drv.d 
 
