@@ -63,6 +63,10 @@
 #define SW1_MESSAGE_ID '1'
 #define SW3_MESSAGE_ID '3'
 
+#define LF 0x0A
+
+#define BUFFER_SIZE 18
+
 /** 
  *  LED ROJO
  *  :XX01Y’LF’ :XX01Y’LF’   Y = E - A - T
@@ -71,12 +75,6 @@
  *  XX = '23'
 **/
 void NUESTROTP_process_led_action_request(uint8_t* buffer, uint8_t received_message_id) {
-    //Leer el ultimo byte que falta, ya que estos paquetes tienen 10 bytes en vez de 9
-    int read_bytes = uart_ringBuffer_recDatos(buffer, 1, 7);
-    
-    if (read_bytes < 1) 
-        return;
-    
     board_ledId_enum requested_led_id = (received_message_id == LED_RED_MESSAGE_ID) ? BOARD_LED_ID_ROJO : BOARD_LED_ID_VERDE;
 
     char requested_led_action = buffer[5]; //'E', 'A' o 'T'
@@ -139,10 +137,86 @@ void NUESTROTP_process_acceleration_request(uint8_t* buffer) {
     uart_ringBuffer_envDatos(buffer, 18);
 }
 
+void NUESTROTP_proccess_request(uint8_t* buffer, int32_t request_length) {
+
+    //Verifico que al menos el mensaje leido tenga la longitud del header + el terminador osea :XXZZ'LF'
+    //Verifico que el identificador sea el correcto
+    if (request_length < 6 || buffer[1] != '2' || buffer[2] != '3')
+        return;
+    
+    uint8_t received_message_type = buffer[3];
+    uint8_t received_message_id = buffer[4];
+
+    switch (received_message_type) {
+        case LED_ACTION_MESSAGE:
+
+            if(request_length != 7)
+                return;
+
+            NUESTROTP_process_led_action_request(buffer, received_message_id);
+
+            break;
+
+        case SW_STATE_MESSAGE:
+
+            if(request_length != 6)
+                return;
+
+            NUESTROTP_process_switch_state_request(buffer, received_message_id);
+
+            break;
+
+        case ACCEL_STATE_MESSAGE:
+
+            if(request_length != 6)
+                return;
+
+            NUESTROTP_process_acceleration_request(buffer);
+
+            break;
+    
+        default:
+            break;
+    }
+}
+
+void NUESTROTP_detect_request() {
+    int32_t ret;
+    uint8_t buffer[BUFFER_SIZE];
+    uint8_t buffer_index = 0;
+
+    //Deteccion de inicio de trama
+    while(1) {
+        while (uart_available_bytes_to_read() < 1);
+        ret = uart_ringBuffer_recDatos(buffer, 1, buffer_index);
+        if (ret == 1 && buffer[0] == ':')
+        {
+            buffer_index++;
+            break;
+        }
+        
+    }
+
+    //Almaceno datos en el buffer hasta que detecto el fin de trama
+    while(buffer_index < BUFFER_SIZE) {
+        while (uart_available_bytes_to_read() < 1);
+        ret = uart_ringBuffer_recDatos(buffer, 1, buffer_index);
+        if (ret == 1) {
+            if (buffer[buffer_index] == ':') { //Detecto interrupcion de la trama actual y comienzo de una nueva
+                buffer_index = 0;
+            }
+            else if(buffer[buffer_index] == LF) {
+                break;
+            }
+            buffer_index++;
+        }
+    }
+    
+    NUESTROTP_proccess_request(buffer, buffer_index + 1);
+}
+
 int main(void)
 {
-    int32_t ret;
-    uint8_t buffer[21];
 
 	BOARD_BootClockRUN();
 
@@ -153,32 +227,7 @@ int main(void)
 	uart_ringBuffer_init();
 
     while(1) {
-        if (uart_available_bytes_to_read() >= 6) {
-            ret = uart_ringBuffer_recDatos(buffer, 6, 0);
-
-            if (ret == 6) {
-                uint8_t received_message_type = buffer[3];
-                uint8_t received_message_id = buffer[4];
-
-                switch (received_message_type) {
-                    case LED_ACTION_MESSAGE:
-                        while (uart_available_bytes_to_read() < 1); //Espero a que llegue el byte que me falta
-                        NUESTROTP_process_led_action_request(buffer, received_message_id);
-                        break;
-
-                    case SW_STATE_MESSAGE:
-                        NUESTROTP_process_switch_state_request(buffer, received_message_id);
-                        break;
-
-                    case ACCEL_STATE_MESSAGE:
-                        NUESTROTP_process_acceleration_request(buffer);
-                        break;
-                
-                    default:
-                        break;
-                }
-            }
-        }
+        NUESTROTP_detect_request();
     }
 }
 
