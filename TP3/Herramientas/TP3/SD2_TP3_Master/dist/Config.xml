@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ConfigProg>
+<EOPT>
+<PuertoComm>COM18</PuertoComm>
+<BaudratePuerto>115200</BaudratePuerto>
+<IdCom>1</IdCom>
+</EOPT>
+</ConfigProg>
