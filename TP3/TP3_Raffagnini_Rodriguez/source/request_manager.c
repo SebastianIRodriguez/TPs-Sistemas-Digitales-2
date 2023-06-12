@@ -65,6 +65,13 @@
  *  :XX02Y’LF’ :XX02Y’LF’   Y = E - A - T
  *  XX = '23'
  **/
+
+void requestManager_init()
+{
+    rs485_drv_init();
+    mma8451_init();
+}
+
 void requestManager_process_led_action_request(uint8_t *buffer, uint8_t received_message_id)
 {
     board_ledId_enum requested_led_id = (received_message_id == LED_RED_MESSAGE_ID) ? BOARD_LED_ID_ROJO : BOARD_LED_ID_VERDE;
@@ -143,10 +150,9 @@ void requestManager_process_acceleration_request(uint8_t *buffer)
 
 void requestManager_process_request(uint8_t *buffer, int32_t request_length)
 {
-
     // Verifico que al menos el mensaje leido tenga la longitud del header + el terminador osea :XXZZ'LF'
     // Verifico que el identificador sea el correcto
-    if (request_length < 6 || buffer[1] != '2' || buffer[2] != '3')
+    if (request_length < 6 || buffer[1] != '2' || buffer[2] != '3' || buffer[0] != ':')
         return;
 
     uint8_t received_message_type = buffer[3];
@@ -189,46 +195,70 @@ void requestManager_process_request(uint8_t *buffer, int32_t request_length)
 void requestManager_detect_request()
 {
     int32_t ret;
-    uint8_t buffer[BUFFER_SIZE];
-    uint8_t buffer_index = 0;
+    static uint8_t buffer[BUFFER_SIZE];
+    static uint8_t buffer_index = 0;
 
-    // Deteccion de inicio de trama
-    while (1)
+    /*  // Deteccion de inicio de trama
+       while (1)
+       {
+           if (rs485_drv_available_bytes_to_read() > 0)
+           {
+               ret = rs485_drv_recDatos(buffer, 1, buffer_index);
+               if (ret == 1 && buffer[0] == ':')
+               {
+                   buffer_index++;
+                   break;
+               }
+           }
+       }
+
+       // Almaceno datos en el buffer hasta que detecto el fin de trama
+       while (buffer_index < BUFFER_SIZE)
+       {
+
+           if (rs485_drv_available_bytes_to_read() > 0)
+           {
+               ret = rs485_drv_recDatos(buffer, 1, buffer_index);
+               if (ret == 1)
+               {
+                   if (buffer[buffer_index] == ':')
+                   { // Detecto interrupcion de la trama actual y comienzo de una nueva
+                       buffer_index = 0;
+                   }
+                   else if (buffer[buffer_index] == LF)
+                   {
+                       break;
+                   }
+                   buffer_index++;
+               }
+           }
+       }
+   */
+
+    if (rs485_drv_available_bytes_to_read() > 0)
     {
-    	if(rs485_drv_available_bytes_to_read() > 0)
-    	{
-    		ret = rs485_drv_recDatos(buffer, 1, buffer_index);
-    		if (ret == 1 && buffer[0] == ':')
-    		{
-    			buffer_index++;
-    			break;
-    		}
-    	}
+        if (buffer_index < BUFFER_SIZE)
+        {
+            ret = rs485_drv_recDatos(buffer, 1, buffer_index);
+            if (ret == 1)
+            {
+                if (buffer[buffer_index] == ':')
+                { // Detecto interrupcion de la trama actual y comienzo de una nueva
+                    buffer_index = 0;
+                }
+                else if (buffer[buffer_index] == LF)
+                {
+                    requestManager_process_request(buffer, buffer_index + 1); 
+                    buffer_index = -1;
+                }
+                buffer_index++;
+            }
+        }
+        else
+        {
+            buffer_index = 0;
+        }
     }
-
-    // Almaceno datos en el buffer hasta que detecto el fin de trama
-    while (buffer_index < BUFFER_SIZE)
-    {
-
-    	if(rs485_drv_available_bytes_to_read() > 0)
-    	{
-    		ret = rs485_drv_recDatos(buffer, 1, buffer_index);
-    		if (ret == 1)
-    		{
-    			if (buffer[buffer_index] == ':')
-    			{ // Detecto interrupcion de la trama actual y comienzo de una nueva
-    				buffer_index = 0;
-    			}
-    			else if (buffer[buffer_index] == LF)
-    			{
-    				break;
-    			}
-    			buffer_index++;
-    		}
-    	}
-    }
-
-    requestManager_process_request(buffer, buffer_index + 1);
 }
 
 /*==================[end of file]============================================*/

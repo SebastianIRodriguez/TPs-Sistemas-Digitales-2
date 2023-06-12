@@ -196,7 +196,6 @@ typedef union
 } FF_MT_SRC_t;
 
 /*==================[internal data declaration]==============================*/
-
 static int16_t readX, readY, readZ;
 
 /*==================[internal functions declaration]=========================*/
@@ -256,8 +255,8 @@ static void mma8451_write_reg(uint8_t addr, uint8_t data)
 }
 
 /*==================[internal data definition]===============================*/
+static bool inited = false;
 static bool is_falling = false;
-// static bool dr_irq_enable = false;
 
 /*==================[external data definition]===============================*/
 
@@ -295,66 +294,70 @@ static void config_port_int1(void)
 /*==================[external functions definition]==========================*/
 void mma8451_init(void)
 {
-    CTRL_REG1_t ctrl_reg1;
-    CTRL_REG4_t ctrl_reg4;
-    CTRL_REG5_t ctrl_reg5;
-    FF_MT_CONFIG_t ff_mt_config;
-    FF_MT_THRESHOLD_t ff_mt_threshold;
-    FF_MT_COUNT_t ff_mt_count;
+    if (!inited)
+    {
+        CTRL_REG1_t ctrl_reg1;
+        CTRL_REG4_t ctrl_reg4;
+        CTRL_REG5_t ctrl_reg5;
+        FF_MT_CONFIG_t ff_mt_config;
+        FF_MT_THRESHOLD_t ff_mt_threshold;
+        FF_MT_COUNT_t ff_mt_count;
 
-    /* Primero desactivo el acelerómetro, luego escribo otros registros*/
+        /* Primero desactivo el acelerómetro, luego escribo otros registros*/
 
-    ctrl_reg1.ACTIVE = 0;
-    ctrl_reg1.F_READ = 0;
-    ctrl_reg1.LNOISE = 1;
-    ctrl_reg1.DR = 0B011; // ODR (Output Data Rate)  (011) - 100 Hz
-    ctrl_reg1.ASLP_RATE = 0B00;
-    // ctrl_reg1.data = 0x20;
-    mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
+        ctrl_reg1.ACTIVE = 0;
+        ctrl_reg1.F_READ = 0;
+        ctrl_reg1.LNOISE = 1;
+        ctrl_reg1.DR = 0B011; // ODR (Output Data Rate)  (011) - 100 Hz
+        ctrl_reg1.ASLP_RATE = 0B00;
+        // ctrl_reg1.data = 0x20;
+        mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
 
-    // Configuro la detección de caída libre
-    ff_mt_config.ELE = 1;
-    ff_mt_config.OAE = 0;
-    ff_mt_config.XEFE = 1;
-    ff_mt_config.YEFE = 1;
-    ff_mt_config.ZEFE = 1;
-    mma8451_write_reg(FF_MT_CONFIG_ADDRESS, ff_mt_config.data);
+        // Configuro la detección de caída libre
+        ff_mt_config.ELE = 1;
+        ff_mt_config.OAE = 0;
+        ff_mt_config.XEFE = 1;
+        ff_mt_config.YEFE = 1;
+        ff_mt_config.ZEFE = 1;
+        mma8451_write_reg(FF_MT_CONFIG_ADDRESS, ff_mt_config.data);
 
-    // Configuro el umbral de detección de caída libre a < 0.2G
-    ff_mt_threshold.threshold = 3; // (3 cuentas * /0.063g)
-    ff_mt_threshold.DBCNTM = 0;
-    mma8451_write_reg(FF_MT_THRESHOLD_ADDRESS, ff_mt_threshold.data);
+        // Configuro el umbral de detección de caída libre a < 0.2G
+        ff_mt_threshold.threshold = 3; // (3 cuentas * /0.063g)
+        ff_mt_threshold.DBCNTM = 0;
+        mma8451_write_reg(FF_MT_THRESHOLD_ADDRESS, ff_mt_threshold.data);
 
-    // Configuro el debouncer/ filtro PB
-    ff_mt_count.count = 12; //  12 cuentas o 120 ms a 100Hz ODR
-    mma8451_write_reg(FF_MT_COUNT_ADDRESS, ff_mt_count.data);
+        // Configuro el debouncer/ filtro PB
+        ff_mt_count.count = 12; //  12 cuentas o 120 ms a 100Hz ODR
+        mma8451_write_reg(FF_MT_COUNT_ADDRESS, ff_mt_count.data);
 
-    // Habilito interrupciones
-    ctrl_reg4.INT_EN_DRDY = 1;  // Data ready
-    ctrl_reg4.INT_EN_FF_MT = 0; // Caída libre
-    ctrl_reg4.INT_EN_PULSE = 0;
-    ctrl_reg4.INT_EN_LNDPRT = 0;
-    ctrl_reg4.INT_EN_TRANS = 0;
-    ctrl_reg4.INT_EN_FIFO = 0;
-    ctrl_reg4.INT_EN_ASLP = 0;
-    mma8451_write_reg(CTRL_REG4_ADDRESS, ctrl_reg4.data);
+        // Habilito interrupciones
+        ctrl_reg4.INT_EN_DRDY = 1;  // Data ready
+        ctrl_reg4.INT_EN_FF_MT = 0; // Caída libre
+        ctrl_reg4.INT_EN_PULSE = 0;
+        ctrl_reg4.INT_EN_LNDPRT = 0;
+        ctrl_reg4.INT_EN_TRANS = 0;
+        ctrl_reg4.INT_EN_FIFO = 0;
+        ctrl_reg4.INT_EN_ASLP = 0;
+        mma8451_write_reg(CTRL_REG4_ADDRESS, ctrl_reg4.data);
 
-    // Ruteo las interrupciones por data ready y por caída libre al pin INT1
-    ctrl_reg5.INT_CFG_DRDY = 1;
-    ctrl_reg5.INT_CFG_FF_MT = 1;
-    ctrl_reg5.INT_CFG_PULSE = 0;
-    ctrl_reg5.INT_CFG_LNDPRT = 0;
-    ctrl_reg5.INT_CFG_TRANS = 0;
-    ctrl_reg5.INT_CFG_FIFO = 0;
-    ctrl_reg5.INT_CFG_ASLP = 0;
-    mma8451_write_reg(CTRL_REG5_ADDRESS, ctrl_reg5.data);
+        // Ruteo las interrupciones por data ready y por caída libre al pin INT1
+        ctrl_reg5.INT_CFG_DRDY = 1;
+        ctrl_reg5.INT_CFG_FF_MT = 1;
+        ctrl_reg5.INT_CFG_PULSE = 0;
+        ctrl_reg5.INT_CFG_LNDPRT = 0;
+        ctrl_reg5.INT_CFG_TRANS = 0;
+        ctrl_reg5.INT_CFG_FIFO = 0;
+        ctrl_reg5.INT_CFG_ASLP = 0;
+        mma8451_write_reg(CTRL_REG5_ADDRESS, ctrl_reg5.data);
 
-    // Pongo en active el dispositivo
-    ctrl_reg1.data = mma8451_read_reg(CTRL_REG1_ADDRESS);
-    ctrl_reg1.data |= 0x01;
-    mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
+        // Pongo en active el dispositivo
+        ctrl_reg1.data = mma8451_read_reg(CTRL_REG1_ADDRESS);
+        ctrl_reg1.data |= 0x01;
+        mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
 
-    config_port_int1();
+        config_port_int1();
+    }
+    inited = true;
 }
 
 void mma8451_setDataRate(DR_enum rate)

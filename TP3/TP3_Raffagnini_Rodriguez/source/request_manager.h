@@ -55,6 +55,7 @@ extern "C" {
 
 /*==================[external functions definition]==========================*/
 
+void requestManager_init();
 void requestManager_detect_request();
 
 /*==================[cplusplus]==============================================*/

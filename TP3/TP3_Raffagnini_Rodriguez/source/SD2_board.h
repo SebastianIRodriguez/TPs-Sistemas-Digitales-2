@@ -50,7 +50,7 @@ extern "C" {
 typedef enum
 {
     BOARD_LED_ID_ROJO = 0,
-    BOARD_LED_ID_VERDE,
+	BOARD_LED_ID_VERDE,
     BOARD_LED_ID_TOTAL
 }board_ledId_enum;
 
@@ -68,6 +68,13 @@ typedef enum
     BOARD_LED_MSG_TOGGLE
 }board_ledMsg_enum;
 
+typedef enum
+{
+	OLED_RST_PIN = 0,
+    OLED_DATA_CMD_PIN,
+	OLED_TOTAL
+}board_oledPin_enum;
+
 typedef struct
 {
     PORT_Type *port;
@@ -81,7 +88,7 @@ typedef struct
 
 /*==================[external functions definition]==========================*/
 
-/** \brief inicializaci�n del hardware
+/** \brief inicialización del hardware
  **
  **/
 void board_init(void);
@@ -93,10 +100,25 @@ void board_setLed(board_ledId_enum id, board_ledMsg_enum msg);
 
 /** \brief Devuelve estado del pulsador indicado
  **
- ** \return true: si el pulsdor est� apretado
- **         false: si el pulsador no est� apretado
+ ** \return true: si el pulsdor está apretado
+ **         false: si el pulsador no está apretado
  **/
 bool board_getSw(board_swId_enum id);
+
+/** \brief Inicializa el SPI0
+ **
+ **/
+void board_configSPI1();
+
+/** \Envia un dato por SPI
+ **
+ **/
+void board_SPISend(uint8_t* buf, size_t len);
+
+/** \Setea al valor indicado el pin del OLED indicado
+ **
+ **/
+void board_setOledPin(board_oledPin_enum oledPin, uint8_t state);
 
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus

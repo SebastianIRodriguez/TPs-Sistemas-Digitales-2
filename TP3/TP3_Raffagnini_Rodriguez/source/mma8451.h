@@ -75,10 +75,10 @@ void mma8451_init(void);
  **
  ** \return Lectura del aceler�metro en cent�cimas de g
  **/
+
 int16_t mma8451_getAcX(void);
 int16_t mma8451_getAcY(void);
 int16_t mma8451_getAcZ(void);
-
 
 void mma8451_setDataRate(DR_enum rate);
 

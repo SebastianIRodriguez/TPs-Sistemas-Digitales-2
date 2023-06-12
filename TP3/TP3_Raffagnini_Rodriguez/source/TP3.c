@@ -1,6 +1,6 @@
 /* Copyright 2022, DSI FCEIA UNR - Sistemas Digitales 2
  *    DSI: http://www.dsi.fceia.unr.edu.ar/
-  * Copyright 2017-2019, Gustavo Muro - Daniel Márquez
+ * Copyright 2017-2019, Gustavo Muro - Daniel Márquez
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,12 +45,11 @@
 #include "board.h"
 #include "MKL43Z4.h"
 #include "pin_mux.h"
-#include "uart0_drv.h"
-#include "rs485_drv.h"
 #include "mma8451.h"
+#include "animacion3D.h"
 #include "SD2_I2C.h"
 #include "request_manager.h"
-
+#include "display_utils.h"
 
 #define _RETARDO_MSEG 100
 
@@ -68,9 +67,6 @@
 
 /*==================[external functions definition]==========================*/
 
-long cuenta = 2000;
-int total = 0;
-
 int main(void)
 {
 	BOARD_BootClockRUN();
@@ -83,39 +79,34 @@ int main(void)
 	mma8451_init();
 	mma8451_setDataRate(DR_12p5hz);
 
-	// Se inicializa driver de UART0
-	uart0_drv_init();
+	// Se inicializa comunicacion a traves del modulo SPI1
+	board_configSPI1();
+
+	// Se inicializa el modulo OLED
+	oled_init();
+	oled_setContrast(16);
+	oled_clearScreen(OLED_COLOR_BLACK);
+	displayUtils_show_base_image();
+
+	// Se inicializa la función de la animación 3D
+	animacion3D_init(110);
 
 	// Se inicializa driver de UART1
-	rs485_drv_init();
+	requestManager_init();
 
 	// Se inicializa interrupción de systick cada 1 ms
 	SysTick_Config(SystemCoreClock / 1000U);
 
-	while(1) {
+	while (1)
+	{
 		requestManager_detect_request();
-        //if(kLPUART_RxOverrunFlag & LPUART_GetStatusFlags(LPUART0))
-        	//board_setLed(BOARD_LED_ID_ROJO, BOARD_LED_MSG_ON);
-
-
 	}
-
 }
-
 
 void SysTick_Handler(void)
 {
-	//cuenta--;
-
-   if(cuenta <= 0)
-   {
-	   cuenta = 2000;
-	   char mensaje[] = "Probando UART0!\n";
-	   uart0_drv_envDatos((uint8_t *)mensaje, strlen(mensaje));
-   }
+	animacion3D_periodicTask1ms();
+	displayUtils_periodicTask1ms();
 }
 
-
 /*==================[end of file]============================================*/
-
-
