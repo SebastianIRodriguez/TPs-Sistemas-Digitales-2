@@ -11,7 +11,7 @@ float OFFSET_X = 2.5, OFFSET_Y = -2.5; //These offsets are chip specific, and va
 //This sets up the Processing 3 Java window dimension and visuals
 void setup() {
   size(400, 300, P3D);
-  sp = new Serial(this, "/dev/ttyACM0", 115200); //You have to rename your port in the "" and change the baud rate.
+  sp = new Serial(this, "COM7", 115200); //You have to rename your port in the "" and change the baud rate.
   buff = new byte[128];
   r = new float[3];
 }
@@ -72,7 +72,7 @@ void buildShape(float rotz, float rotx) {
 //Sets the values in an array
 void setVals(float[] r, String s) {
   int i = 0;
-  r[0] = -(float)(Integer.parseInt(s.substring(0, i = s.indexOf(" "))) +OFFSET_X)*HALF_PI/256;
-  r[1] = -(float)(Integer.parseInt(s.substring(i+1, i = s.indexOf(" ", i+1))) + OFFSET_Y)*HALF_PI/256;
+  r[0] = -(float)(Integer.parseInt(s.substring(0, i = s.indexOf(" "))) +OFFSET_X)*HALF_PI/100;
+  r[1] = -(float)(Integer.parseInt(s.substring(i+1, i = s.indexOf(" ", i+1))) + OFFSET_Y)*HALF_PI/100;
   r[2] = (float) Integer.parseInt(s.substring(i+1));
 }

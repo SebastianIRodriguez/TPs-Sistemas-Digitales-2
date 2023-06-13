@@ -74,6 +74,10 @@ void requestManager_init()
 
 void requestManager_process_led_action_request(uint8_t *buffer, uint8_t received_message_id)
 {
+
+    if(received_message_id != LED_RED_MESSAGE_ID && received_message_id != LED_GREEN_MESSAGE_ID)
+    	return;
+
     board_ledId_enum requested_led_id = (received_message_id == LED_RED_MESSAGE_ID) ? BOARD_LED_ID_ROJO : BOARD_LED_ID_VERDE;
 
     char requested_led_action = buffer[5]; //'E', 'A' o 'T'
@@ -132,13 +136,12 @@ void requestManager_process_switch_state_request(uint8_t *buffer, uint8_t receiv
  * :XX21’LF’ :XX21SXXXSYYYSZZZ’LF’
  * XX = '23'
  */
-void requestManager_process_acceleration_request(uint8_t *buffer)
+void requestManager_process_acceleration_request(uint8_t *buffer, uint8_t received_message_id)
 {
 
-    if (buffer[4] != '1') // Si no se envia el codigo correcto, no respondo el pedido
+    if (received_message_id != '1') // Si no se envia el codigo correcto, no respondo el pedido
         return;
 
-    // TODO: obtener medicion del acelerometro
     int accX = mma8451_getAcX();
     int accY = mma8451_getAcY();
     int accZ = mma8451_getAcZ();
@@ -152,7 +155,7 @@ void requestManager_process_request(uint8_t *buffer, int32_t request_length)
 {
     // Verifico que al menos el mensaje leido tenga la longitud del header + el terminador osea :XXZZ'LF'
     // Verifico que el identificador sea el correcto
-    if (request_length < 6 || buffer[1] != '2' || buffer[2] != '3' || buffer[0] != ':')
+    if (request_length < 6 || buffer[0] != ':'|| buffer[1] != '2' || buffer[2] != '3')
         return;
 
     uint8_t received_message_type = buffer[3];
@@ -183,7 +186,7 @@ void requestManager_process_request(uint8_t *buffer, int32_t request_length)
         if (request_length != 6)
             return;
 
-        requestManager_process_acceleration_request(buffer);
+        requestManager_process_acceleration_request(buffer, received_message_id);
 
         break;
 
@@ -194,46 +197,9 @@ void requestManager_process_request(uint8_t *buffer, int32_t request_length)
 
 void requestManager_detect_request()
 {
-    int32_t ret;
+    int32_t ret = 0;
     static uint8_t buffer[BUFFER_SIZE];
     static uint8_t buffer_index = 0;
-
-    /*  // Deteccion de inicio de trama
-       while (1)
-       {
-           if (rs485_drv_available_bytes_to_read() > 0)
-           {
-               ret = rs485_drv_recDatos(buffer, 1, buffer_index);
-               if (ret == 1 && buffer[0] == ':')
-               {
-                   buffer_index++;
-                   break;
-               }
-           }
-       }
-
-       // Almaceno datos en el buffer hasta que detecto el fin de trama
-       while (buffer_index < BUFFER_SIZE)
-       {
-
-           if (rs485_drv_available_bytes_to_read() > 0)
-           {
-               ret = rs485_drv_recDatos(buffer, 1, buffer_index);
-               if (ret == 1)
-               {
-                   if (buffer[buffer_index] == ':')
-                   { // Detecto interrupcion de la trama actual y comienzo de una nueva
-                       buffer_index = 0;
-                   }
-                   else if (buffer[buffer_index] == LF)
-                   {
-                       break;
-                   }
-                   buffer_index++;
-               }
-           }
-       }
-   */
 
     if (rs485_drv_available_bytes_to_read() > 0)
     {
@@ -245,6 +211,7 @@ void requestManager_detect_request()
                 if (buffer[buffer_index] == ':')
                 { // Detecto interrupcion de la trama actual y comienzo de una nueva
                     buffer_index = 0;
+                    buffer[0] = ':';
                 }
                 else if (buffer[buffer_index] == LF)
                 {

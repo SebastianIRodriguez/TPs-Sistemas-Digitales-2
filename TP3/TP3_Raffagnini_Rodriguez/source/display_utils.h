@@ -28,6 +28,8 @@ void displayUtils_show_base_image(void);
 
 void displayUtils_periodicTask1ms(void);
 
+void displayUtils_init();
+
 /*==================[cplusplus]==============================================*/
 #ifdef __cplusplus
 }

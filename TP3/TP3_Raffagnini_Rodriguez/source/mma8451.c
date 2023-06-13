@@ -356,6 +356,9 @@ void mma8451_init(void)
         mma8451_write_reg(CTRL_REG1_ADDRESS, ctrl_reg1.data);
 
         config_port_int1();
+
+    	// Se setea el DR
+    	mma8451_setDataRate(DR_12p5hz);
     }
     inited = true;
 }

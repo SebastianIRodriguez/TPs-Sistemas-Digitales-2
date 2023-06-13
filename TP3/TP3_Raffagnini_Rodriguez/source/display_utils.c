@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include "mma8451.h"
 #include "pato_lucas.h"
+#include "SD2_board.h"
 
 /*==================[macros and definitions]=================================*/
 
@@ -107,23 +108,35 @@ void displayUtils_print_accel(int accX, int accY, int accZ) {
     sprintf(completo, "Z: % 4d", accZ);
     oled_putString(83, 28, (uint8_t*) completo, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-    if (accX > 50) {
-        displayUtils_print_image(IMAGE_X + 14, 15, ojos_derecha, 24, 24);
+    if (accX > 35) {
+        displayUtils_print_image(IMAGE_X + 16, 15, ojos_derecha, 24, 24);
     }
-    else if(accX < -50) {
-        displayUtils_print_image(IMAGE_X + 14, 15, ojos_izquierda, 24, 24);
+    else if(accX < -35) {
+        displayUtils_print_image(IMAGE_X + 16, 15, ojos_izquierda, 24, 24);
     }
-    else if(accY > 50) {
-        displayUtils_print_image(IMAGE_X + 14, 15, ojos_arriba, 24, 24);
+    else if(accY > 35) {
+        displayUtils_print_image(IMAGE_X + 16, 15, ojos_arriba, 24, 24);
     }
-    else if(accY < -50) {
-        displayUtils_print_image(IMAGE_X + 14, 15, ojos_abajo, 24, 24);
+    else if(accY < -35) {
+        displayUtils_print_image(IMAGE_X + 16, 15, ojos_abajo, 24, 24);
     }
     else {
-        displayUtils_print_image(IMAGE_X + 14, 15, ojos_centro, 24, 24);
+        displayUtils_print_image(IMAGE_X + 16, 15, ojos_centro, 24, 24);
     }
     
 }
+
+void displayUtils_init() {
+	// Se inicializa comunicacion a traves del modulo SPI1
+	board_configSPI1();
+
+	// Se inicializa el modulo OLED
+	oled_init();
+	oled_setContrast(16);
+	oled_clearScreen(OLED_COLOR_BLACK);
+}
+
+
 
 void displayUtils_show_base_image() {
     displayUtils_print_image(IMAGE_X, IMAGE_Y, pato_lucas, 64, 56);

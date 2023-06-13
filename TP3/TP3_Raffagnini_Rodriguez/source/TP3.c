@@ -32,12 +32,6 @@
  */
 
 /*==================[inclusions]=============================================*/
-
-// Standard C Included Files
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-
 // Project Included Files
 #include "SD2_board.h"
 #include "fsl_lpuart.h"
@@ -45,13 +39,11 @@
 #include "board.h"
 #include "MKL43Z4.h"
 #include "pin_mux.h"
-#include "mma8451.h"
+//#include "mma8451.h"
 #include "animacion3D.h"
 #include "SD2_I2C.h"
 #include "request_manager.h"
 #include "display_utils.h"
-
-#define _RETARDO_MSEG 100
 
 /*==================[macros and definitions]=================================*/
 
@@ -74,18 +66,11 @@ int main(void)
 	// Se inicializan funciones de la placa
 	board_init();
 
-	// Se inicializa el I2C y el acelerómetro
+	// Se inicializa el I2C
 	SD2_I2C_init();
-	mma8451_init();
-	mma8451_setDataRate(DR_12p5hz);
 
-	// Se inicializa comunicacion a traves del modulo SPI1
-	board_configSPI1();
-
-	// Se inicializa el modulo OLED
-	oled_init();
-	oled_setContrast(16);
-	oled_clearScreen(OLED_COLOR_BLACK);
+	// Oled
+	displayUtils_init();
 	displayUtils_show_base_image();
 
 	// Se inicializa la función de la animación 3D
